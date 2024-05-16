@@ -12,7 +12,20 @@
           "package_name": "com.example.teamwork_alvarezlopez_saul"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "601935688943-8jon3h06lvm34ajjj22h56cnpicmuonf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.teamwork_alvarezlopez_saul",
+            "certificate_hash": "d8e2f831acadd71e16c3fdceb6699e6f243d85b6"
+          }
+        },
+        {
+          "client_id": "601935688943-rafsmnb7tv76dmcmejmj2auh9osq4po4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDB0wwTH_BaZSqvnzn14O7uApiigzlJxrU"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "601935688943-rafsmnb7tv76dmcmejmj2auh9osq4po4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

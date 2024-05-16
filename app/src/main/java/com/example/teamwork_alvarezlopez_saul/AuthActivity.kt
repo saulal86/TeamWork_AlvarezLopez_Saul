@@ -63,16 +63,22 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun setup(){
-        title = "Autentication"
+        title = "Autenticación"
 
+        // Listener para el botón de registro
         signUpButton.setOnClickListener{
+            // Verifica si los campos de correo electrónico y contraseña no están vacíos
             if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
+                // Intenta crear un usuario con correo electrónico y contraseña
                 FirebaseAuth.getInstance().createUserWithEmailAndPassword(emailEditText.text.toString(),
                     contraseñaEditText.text.toString()).addOnCompleteListener {
+                    // Verifica si la operación de creación de usuario fue exitosa
                     if(it.isSuccessful){
+                        // Muestra la actividad principal con el correo electrónico del usuario
                         showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
                     }else{
-                        showAlert()
+                        // Muestra una alerta en caso de error
+                        showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                     }
                 }
             }
@@ -85,7 +91,7 @@ class AuthActivity : AppCompatActivity() {
                     if(it.isSuccessful){
                         showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
                     }else{
-                        showAlert()
+                        showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                     }
                 }
             }
@@ -106,15 +112,10 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAlert() {
+    private fun showAlert(title: String, message: String) {
         val builder = AlertDialog.Builder(this)
-        if (emailEditText.text.isEmpty() || contraseñaEditText.text.isEmpty()) {
-            builder.setTitle("Error")
-            builder.setMessage("Hay algún campo vacío")
-        } else {
-            builder.setTitle("Error")
-            builder.setMessage("Se ha producido un error autenticando al usuario")
-        }
+        builder.setTitle(title)
+        builder.setMessage(message)
         builder.setPositiveButton("Aceptar", null)
         val dialog: AlertDialog = builder.create()
         dialog.show()
@@ -162,7 +163,7 @@ class AuthActivity : AppCompatActivity() {
                             if (it.isSuccessful) {
                                 showHome(account.email ?: "", ProviderType.GOOGLE)
                             } else {
-                                showAlert()
+                                showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                             }
                         }
                 }
