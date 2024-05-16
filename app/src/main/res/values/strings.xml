@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TeamWork_AlvarezLopez_Saul</string>
+    <string name="prefs_file">com.example.pruebaproyecto_saul.PREFERENCE_FILE_KEY</string>
 </resources>
