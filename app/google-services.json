@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "601935688943",
+    "project_id": "teamwork-alvarezlopezsaul",
+    "storage_bucket": "teamwork-alvarezlopezsaul.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601935688943:android:028dabcb485572d5f5571a",
+        "android_client_info": {
+          "package_name": "com.example.teamwork_alvarezlopez_saul"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB0wwTH_BaZSqvnzn14O7uApiigzlJxrU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
