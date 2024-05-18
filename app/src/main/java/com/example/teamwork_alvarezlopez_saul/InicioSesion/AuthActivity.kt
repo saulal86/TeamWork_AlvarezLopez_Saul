@@ -1,4 +1,4 @@
-package com.example.teamwork_alvarezlopez_saul
+package com.example.teamwork_alvarezlopez_saul.InicioSesion
 
 import android.content.Context
 import android.content.Intent
@@ -10,6 +10,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import com.example.teamwork_alvarezlopez_saul.HomeActivity
+import com.example.teamwork_alvarezlopez_saul.Notas.EditorTextos
+import com.example.teamwork_alvarezlopez_saul.ProviderType
+import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -122,7 +126,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun showHome (email: String, provider: ProviderType){
-        val homeIntent = Intent(this, HomeActivity::class.java).apply {
+        val homeIntent = Intent(this, EditorTextos::class.java).apply {
             putExtra("email", email)
             putExtra("provider", provider.name)
         }

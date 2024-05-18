@@ -13,10 +13,13 @@
         android:theme="@style/Theme.Material3.Light.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".editor.EditorTextos"
+            android:name=".PDF.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".AuthActivity"
+            android:name=".Notas.EditorTextos"
+            android:exported="false" />
+        <activity
+            android:name=".InicioSesion.AuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +29,7 @@
         </activity>
         <activity
             android:name=".HomeActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
     </application>
 
 </manifest>
