@@ -9,6 +9,7 @@ public class InfoObjetos {
     double amount;
 
     public InfoObjetos() {
+        
     }
 
     public long getInvoiceNo() {

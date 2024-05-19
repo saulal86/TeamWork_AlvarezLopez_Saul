@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "601935688943",
+    "firebase_url": "https://teamwork-alvarezlopezsaul-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "teamwork-alvarezlopezsaul",
     "storage_bucket": "teamwork-alvarezlopezsaul.appspot.com"
   },
@@ -14,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "601935688943-8jon3h06lvm34ajjj22h56cnpicmuonf.apps.googleusercontent.com",
+          "client_id": "601935688943-2baujksg6hs8h4ohc27vt29k3tr7141u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.teamwork_alvarezlopez_saul",
-            "certificate_hash": "d8e2f831acadd71e16c3fdceb6699e6f243d85b6"
+            "certificate_hash": "cd99658e88e37dd86ba1a51749400b5ef04e2546"
           }
         },
         {

@@ -10,9 +10,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
-import com.example.teamwork_alvarezlopez_saul.HomeActivity
 import com.example.teamwork_alvarezlopez_saul.Notas.EditorTextos
-import com.example.teamwork_alvarezlopez_saul.ProviderType
+import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions

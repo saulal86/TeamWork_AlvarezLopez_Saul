@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HomeActivity"
+            android:name=".Cerrar_Sesion.HomeActivity"
             android:exported="false" />
     </application>
 

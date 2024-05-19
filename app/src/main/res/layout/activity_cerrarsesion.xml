@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Theme.Material3.Light.NoActionBar"
-    tools:context=".HomeActivity">
+    tools:context=".Cerrar_Sesion.HomeActivity">
 
     <LinearLayout
         android:layout_width="0dp"
