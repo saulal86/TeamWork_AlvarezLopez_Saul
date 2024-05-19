@@ -51,7 +51,13 @@ class AuthActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        authLayout.visibility = View.VISIBLE
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null && currentUser.isEmailVerified) {
+            authLayout.visibility = View.INVISIBLE
+            showHome(currentUser.email ?: "", ProviderType.BASIC)
+        } else {
+            authLayout.visibility = View.VISIBLE
+        }
     }
 
     private fun session() {
@@ -70,33 +76,46 @@ class AuthActivity : AppCompatActivity() {
 
         // Listener para el botón de registro
         signUpButton.setOnClickListener{
-            // Verifica si los campos de correo electrónico y contraseña no están vacíos
             if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
-                // Intenta crear un usuario con correo electrónico y contraseña
                 FirebaseAuth.getInstance().createUserWithEmailAndPassword(emailEditText.text.toString(),
-                    contraseñaEditText.text.toString()).addOnCompleteListener {
-                    // Verifica si la operación de creación de usuario fue exitosa
-                    if(it.isSuccessful){
-                        // Muestra la actividad principal con el correo electrónico del usuario
-                        showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
-                    }else{
-                        // Muestra una alerta en caso de error
-                        showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
+                    contraseñaEditText.text.toString()).addOnCompleteListener { task ->
+                    if(task.isSuccessful){
+                        val user = task.result?.user
+                        user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
+                            if (verificationTask.isSuccessful) {
+                                showEmailVerificationSentAlert()
+                                FirebaseAuth.getInstance().signOut()
+                                authLayout.visibility = View.VISIBLE
+                            } else {
+                                showAlert("Error", "Error al enviar el correo de verificación")
+                            }
+                        }
+                    } else {
+                        showAlert("Error", "Se ha producido un error autenticando al usuario")
                     }
                 }
+            } else {
+                showAlert("Error", "Hay algún campo vacío")
             }
         }
 
         loginButton.setOnClickListener{
             if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(emailEditText.text.toString(),
-                    contraseñaEditText.text.toString()).addOnCompleteListener {
-                    if(it.isSuccessful){
-                        showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
-                    }else{
-                        showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
+                    contraseñaEditText.text.toString()).addOnCompleteListener { task ->
+                    if(task.isSuccessful){
+                        val user = task.result?.user
+                        if (user != null && user.isEmailVerified) {
+                            showHome(user.email ?: "", ProviderType.BASIC)
+                        } else {
+                            showAlert("Error", "Debes verificar tu correo electrónico antes de iniciar sesión")
+                        }
+                    } else {
+                        showAlert("Error", "Se ha producido un error autenticando al usuario")
                     }
                 }
+            } else {
+                showAlert("Error", "Hay algún campo vacío")
             }
         }
 
@@ -119,6 +138,15 @@ class AuthActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setMessage(message)
+        builder.setPositiveButton("Aceptar", null)
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+    private fun showEmailVerificationSentAlert() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Verificación de correo electrónico")
+        builder.setMessage("Se ha enviado un correo de verificación. Por favor, verifica tu correo " +
+                "antes de iniciar sesión. Cuando haya verificado su correo electrónico inicie sesión.")
         builder.setPositiveButton("Aceptar", null)
         val dialog: AlertDialog = builder.create()
         dialog.show()
