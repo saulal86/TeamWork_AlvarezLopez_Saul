@@ -158,6 +158,7 @@ class AuthActivity : AppCompatActivity() {
             putExtra("provider", provider.name)
         }
         startActivity(homeIntent)
+        finish()
     }
 
     // Método para obtener el default_web_client_id desde google-services.json
