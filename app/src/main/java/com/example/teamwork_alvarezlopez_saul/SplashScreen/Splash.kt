@@ -2,16 +2,10 @@ package com.example.teamwork_alvarezlopez_saul.SplashScreen
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.HomeActivity
-import com.example.teamwork_alvarezlopez_saul.InicioSesion.AuthActivity
-import com.example.teamwork_alvarezlopez_saul.Notas.EditorTextos
-import com.example.teamwork_alvarezlopez_saul.R
-import com.google.firebase.auth.FirebaseAuth
+import com.example.teamwork_alvarezlopez_saul.InicioSesion.SignIn
+import com.example.teamwork_alvarezlopez_saul.InicioSesion.SignUp
 
 class Splash : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +15,7 @@ class Splash : AppCompatActivity() {
         // No se necesita setContentView ya que la pantalla splash se maneja por tema
 
         screenSplash.setKeepOnScreenCondition { true }
-        val intent = Intent(this, AuthActivity::class.java)
+        val intent = Intent(this, SignUp::class.java)
         startActivity(intent)
         finish()
     }

@@ -141,4 +141,11 @@
     <color name="md_theme_surfaceContainer_highContrast">#EAEEF2</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#E4E9EC</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#DFE3E7</color>
+    <color name="firstprimary">#eec134</color>
+    <color name="firstsecondary">#2d97cb</color>
+    <color name="firsttertiary">#69ff69</color>
+
+    <style name="RoundButton">
+        <item name="android:background">@drawable/round_button</item>
+    </style>
 </resources>

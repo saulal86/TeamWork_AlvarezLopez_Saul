@@ -19,7 +19,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
-class AuthActivity : AppCompatActivity() {
+class SignIn : AppCompatActivity() {
 
     // Declaración de variables
     private lateinit var loginButton: Button
@@ -32,7 +32,7 @@ class AuthActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_auth)
+        setContentView(R.layout.activity_sign_in)
 
         // Inicialización de las variables
         signUpButton = findViewById(R.id.signUpbutton)

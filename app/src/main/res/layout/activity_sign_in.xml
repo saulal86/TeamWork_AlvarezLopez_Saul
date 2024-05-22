@@ -7,7 +7,7 @@
     android:background="#FFFFFF"
     android:backgroundTint="@color/md_theme_outline"
     android:theme="@style/Theme.Material3.Light.NoActionBar"
-    tools:context=".InicioSesion.AuthActivity">
+    tools:context=".InicioSesion.SignIn">
 
     <LinearLayout
         android:id="@+id/authLayout"
