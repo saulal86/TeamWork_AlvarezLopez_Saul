@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Notas.EditorTextos"
+            android:name=".Notas.Notes"
             android:exported="false"
             android:theme="@style/AppTheme" />
         <activity

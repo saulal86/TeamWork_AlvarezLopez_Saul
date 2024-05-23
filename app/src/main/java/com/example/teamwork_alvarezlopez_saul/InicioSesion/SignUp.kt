@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -13,7 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.ProviderType
-import com.example.teamwork_alvarezlopez_saul.Notas.EditorTextos
+import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -27,7 +28,7 @@ class SignUp : AppCompatActivity() {
     private lateinit var contraseñaEditText: EditText
     private lateinit var confirmarcontraseñaEditText: EditText
     private lateinit var googleButton: ImageButton
-    private lateinit var SingUpLayout: ConstraintLayout
+    private lateinit var SignUpLayout: ConstraintLayout
     private lateinit var textoiniciarsesion: TextView
     private val GOOGLE_SIGN_IN = 100
 
@@ -39,7 +40,7 @@ class SignUp : AppCompatActivity() {
         signUpButton = findViewById(R.id.signUpbutton)
         emailEditText = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
-        SingUpLayout = findViewById(R.id.SingUpLayout)
+        SignUpLayout = findViewById(R.id.SignUpLayout)
         confirmarcontraseñaEditText = findViewById(R.id.confirmarcontraseñaEditText)
         textoiniciarsesion = findViewById(R.id.textoiniciarsesion)
         googleButton = findViewById(R.id.googlebutton)
@@ -52,21 +53,22 @@ class SignUp : AppCompatActivity() {
         super.onStart()
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            if (currentUser.isEmailVerified) {
-                SingUpLayout.visibility = View.INVISIBLE
-                showHome(currentUser.email ?: "", ProviderType.BASIC)
-            } else {
-                SingUpLayout.visibility = View.VISIBLE
-            }
+            SignUpLayout.visibility = View.INVISIBLE
+            showHome(currentUser.email ?: "", ProviderType.BASIC)
+        } else {
+            SignUpLayout.visibility = View.VISIBLE
+            FirebaseAuth.getInstance().signOut()
         }
     }
+
+
     private fun session() {
         val prefs = getSharedPreferences(getString(R.string.prefs_file), MODE_PRIVATE)
         val email = prefs.getString("email", null)
         val provider = prefs.getString("provider", null)
 
         if (email != null && provider != null) {
-            SingUpLayout.visibility = View.INVISIBLE
+            SignUpLayout.visibility = View.INVISIBLE
             showHome(email, ProviderType.valueOf(provider))
         }
     }
@@ -152,7 +154,7 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun showHome(email: String, provider: ProviderType) {
-        val homeIntent = Intent(this, EditorTextos::class.java).apply {
+        val homeIntent = Intent(this, Notes::class.java).apply {
             putExtra("email", email)
             putExtra("provider", provider.name)
         }
