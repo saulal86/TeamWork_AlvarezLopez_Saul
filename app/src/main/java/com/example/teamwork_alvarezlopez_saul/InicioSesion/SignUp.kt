@@ -113,7 +113,7 @@ class SignUp : AppCompatActivity() {
         }
 
         textoiniciarsesion.setOnClickListener{
-            val intent = Intent(this, SignIn::class.java)
+            val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
             finish()
         }

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.teamwork_alvarezlopez_saul.InicioSesion.SignIn
 import com.example.teamwork_alvarezlopez_saul.InicioSesion.SignUp
 
 class Splash : AppCompatActivity() {

@@ -19,7 +19,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
-class SignIn : AppCompatActivity() {
+class LogIn : AppCompatActivity() {
 
     // Declaración de variables
     private lateinit var loginButton: Button
