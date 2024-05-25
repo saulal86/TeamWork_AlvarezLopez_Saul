@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.R
@@ -23,24 +24,22 @@ class LogIn : AppCompatActivity() {
 
     // Declaración de variables
     private lateinit var loginButton: Button
-    private lateinit var signUpButton: Button
     private lateinit var emailEditText: EditText
     private lateinit var contraseñaEditText: EditText
-    private lateinit var authLayout: LinearLayout
     private lateinit var googleButton: Button
+    private lateinit var loginLayout: ConstraintLayout
     private val GOOGLE_SIGN_IN = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_in)
+        setContentView(R.layout.activity_log_in)
 
         // Inicialización de las variables
-        signUpButton = findViewById(R.id.signUpbutton)
         loginButton = findViewById(R.id.logInButton)
         emailEditText = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
-        authLayout = findViewById(R.id.authLayout)
         googleButton = findViewById(R.id.googlebutton)
+        loginLayout = findViewById(R.id.LogInLayout)
 
         // Configuración
         setup()
@@ -53,10 +52,10 @@ class LogIn : AppCompatActivity() {
         super.onStart()
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null && currentUser.isEmailVerified) {
-            authLayout.visibility = View.INVISIBLE
+            loginLayout.visibility = View.INVISIBLE
             showHome(currentUser.email ?: "", ProviderType.BASIC)
         } else {
-            authLayout.visibility = View.VISIBLE
+            loginLayout.visibility = View.VISIBLE
         }
     }
 
@@ -66,7 +65,7 @@ class LogIn : AppCompatActivity() {
         val provider = prefs.getString("provider", null)
 
         if (email != null && provider != null) {
-            authLayout.visibility = View.INVISIBLE
+            loginLayout.visibility = View.INVISIBLE
             showHome(email, ProviderType.valueOf(provider))
         }
     }
@@ -75,30 +74,6 @@ class LogIn : AppCompatActivity() {
         title = "Autenticación"
 
         // Listener para el botón de registro
-        signUpButton.setOnClickListener{
-            if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
-                FirebaseAuth.getInstance().createUserWithEmailAndPassword(emailEditText.text.toString(),
-                    contraseñaEditText.text.toString()).addOnCompleteListener { task ->
-                    if(task.isSuccessful){
-                        val user = task.result?.user
-                        user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
-                            if (verificationTask.isSuccessful) {
-                                showEmailVerificationSentAlert()
-                                FirebaseAuth.getInstance().signOut()
-                                authLayout.visibility = View.VISIBLE
-                            } else {
-                                showAlert("Error", "Error al enviar el correo de verificación")
-                            }
-                        }
-                    } else {
-                        showAlert("Error", "Se ha producido un error autenticando al usuario")
-                    }
-                }
-            } else {
-                showAlert("Error", "Hay algún campo vacío")
-            }
-        }
-
         loginButton.setOnClickListener{
             if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(emailEditText.text.toString(),
@@ -120,7 +95,6 @@ class LogIn : AppCompatActivity() {
         }
 
         googleButton.setOnClickListener{
-            // Configuración de Google Sign-In
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getGoogleClientId(this)).requestEmail().build()
 
@@ -128,9 +102,6 @@ class LogIn : AppCompatActivity() {
             googleClient.signOut()
 
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
-
-
-            // Continúa con el código para iniciar sesión con Google
         }
     }
 
@@ -161,8 +132,7 @@ class LogIn : AppCompatActivity() {
         finish()
     }
 
-    // Método para obtener el default_web_client_id desde google-services.json
-    private fun getGoogleClientId(context: Context): String {
+        private fun getGoogleClientId(context: Context): String {
         try {
             val resources = context.resources
             val packageName = context.packageName
