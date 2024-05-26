@@ -89,13 +89,9 @@ public class Notes extends AppCompatActivity {
 
     class GestureListener extends GestureDetector.SimpleOnGestureListener{
         @Override
-        public void onLongPress(@NonNull MotionEvent e) {
-            finishAffinity();
-        }
-
-        @Override
         public boolean onDoubleTap(@NonNull MotionEvent e) {
             FirebaseAuth.getInstance().signOut();
+            finishAffinity();
             return true;
         }
     }

@@ -5,10 +5,12 @@ import android.content.Intent
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
@@ -26,8 +28,9 @@ class LogIn : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var emailEditText: EditText
     private lateinit var contraseñaEditText: EditText
-    private lateinit var googleButton: Button
+    private lateinit var googleButton: ImageButton
     private lateinit var loginLayout: ConstraintLayout
+    private lateinit var textoregistrarse: TextView
     private val GOOGLE_SIGN_IN = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,35 +43,12 @@ class LogIn : AppCompatActivity() {
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
         googleButton = findViewById(R.id.googlebutton)
         loginLayout = findViewById(R.id.LogInLayout)
+        textoregistrarse = findViewById(R.id.textoregistrarse)
 
         // Configuración
         setup()
-
-        // Comprobar si hay una sesión activa
-        session()
     }
 
-    override fun onStart() {
-        super.onStart()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null && currentUser.isEmailVerified) {
-            loginLayout.visibility = View.INVISIBLE
-            showHome(currentUser.email ?: "", ProviderType.BASIC)
-        } else {
-            loginLayout.visibility = View.VISIBLE
-        }
-    }
-
-    private fun session() {
-        val prefs = getSharedPreferences(getString(R.string.prefs_file), MODE_PRIVATE)
-        val email = prefs.getString("email", null)
-        val provider = prefs.getString("provider", null)
-
-        if (email != null && provider != null) {
-            loginLayout.visibility = View.INVISIBLE
-            showHome(email, ProviderType.valueOf(provider))
-        }
-    }
 
     private fun setup(){
         title = "Autenticación"
@@ -103,6 +83,19 @@ class LogIn : AppCompatActivity() {
 
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
         }
+
+        textoregistrarse.setOnClickListener{
+            Log.d("LogInActivity", "textoregistrarse clicked")
+            val intent = Intent(this, SignUp::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+//        textoiniciarsesionlogin.setOnClickListener{
+//            val intent = Intent(this, SignUp::class.java)
+//            startActivity(intent)
+//            finish()
+//        }
     }
 
     private fun showAlert(title: String, message: String) {

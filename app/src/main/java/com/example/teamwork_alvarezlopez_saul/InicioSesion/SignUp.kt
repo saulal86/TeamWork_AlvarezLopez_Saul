@@ -53,23 +53,17 @@ class SignUp : AppCompatActivity() {
         super.onStart()
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            SignUpLayout.visibility = View.INVISIBLE
-            showHome(currentUser.email ?: "", ProviderType.BASIC)
+            if (currentUser.isEmailVerified) {
+                SignUpLayout.visibility = View.INVISIBLE
+                showHome(currentUser.email ?: "", ProviderType.BASIC)
+            } else {
+                val intent = Intent(this, LogIn::class.java)
+                startActivity(intent)
+                finish()
+            }
         } else {
             SignUpLayout.visibility = View.VISIBLE
             FirebaseAuth.getInstance().signOut()
-        }
-    }
-
-
-    private fun session() {
-        val prefs = getSharedPreferences(getString(R.string.prefs_file), MODE_PRIVATE)
-        val email = prefs.getString("email", null)
-        val provider = prefs.getString("provider", null)
-
-        if (email != null && provider != null) {
-            SignUpLayout.visibility = View.INVISIBLE
-            showHome(email, ProviderType.valueOf(provider))
         }
     }
 
@@ -100,8 +94,6 @@ class SignUp : AppCompatActivity() {
                 showAlert("Error", "Hay algún campo vacío")
             }
         }
-
-
 
         googleButton.setOnClickListener {
             // Configuración de Google Sign-In
@@ -137,6 +129,7 @@ class SignUp : AppCompatActivity() {
             showHome(email, provider)
         } else {
             // El usuario no ha verificado su correo electrónico, mostrar un mensaje o llevarlo a una pantalla de verificación de correo electrónico
+            currentUser?.sendEmailVerification()
             showEmailNotVerifiedAlert()
         }
     }
@@ -191,7 +184,14 @@ class SignUp : AppCompatActivity() {
                     FirebaseAuth.getInstance().signInWithCredential(credential)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
-                                showHomeOrVerifyEmail(account.email ?: "", ProviderType.GOOGLE)
+                                val user = FirebaseAuth.getInstance().currentUser
+                                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
+                                    if (verificationTask.isSuccessful) {
+                                        showEmailNotVerifiedAlert()
+                                    } else {
+                                        showAlert("Error", "Error al enviar el correo de verificación")
+                                    }
+                                }
                             } else {
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                             }
@@ -202,7 +202,4 @@ class SignUp : AppCompatActivity() {
             }
         }
     }
-
-
 }
-
