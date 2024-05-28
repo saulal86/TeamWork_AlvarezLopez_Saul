@@ -86,6 +86,7 @@ class LogIn : AppCompatActivity() {
 
         textoregistrarse.setOnClickListener{
             Log.d("LogInActivity", "textoregistrarse clicked")
+            FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
             finish()

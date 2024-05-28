@@ -67,7 +67,7 @@ class SignUp : AppCompatActivity() {
         }
     }
 
-    private fun setup(){
+    private fun setup() {
         title = "Autenticación"
 
         // Listener para el botón de registro
@@ -76,7 +76,7 @@ class SignUp : AppCompatActivity() {
             val password = contraseñaEditText.text.toString()
             val confirmPassword = confirmarcontraseñaEditText.text.toString()
 
-            if (email.isNotEmpty() && password.isNotEmpty()) {
+            if (validateEmail(email) && validatePassword(password)) {
                 if (password == confirmPassword) {
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
@@ -91,7 +91,7 @@ class SignUp : AppCompatActivity() {
                     showAlert("Error", "Las contraseñas no coinciden")
                 }
             } else {
-                showAlert("Error", "Hay algún campo vacío")
+                showAlert("Error", "Email o contraseña no válidos")
             }
         }
 
@@ -106,11 +106,25 @@ class SignUp : AppCompatActivity() {
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
         }
 
-        textoiniciarsesion.setOnClickListener{
+        textoiniciarsesion.setOnClickListener {
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun validateEmail(email: String): Boolean {
+        val emailPattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.(com|es)$")
+        val isValid = emailPattern.matches(email)
+        Log.d("SignUp", "Email validation for $email: $isValid")
+        return isValid
+    }
+
+    private fun validatePassword(password: String): Boolean {
+        val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,}$")
+        val isValid = passwordPattern.matches(password)
+        Log.d("SignUp", "Password validation for $password: $isValid")
+        return isValid
     }
 
     private fun showAlert(title: String, message: String) {

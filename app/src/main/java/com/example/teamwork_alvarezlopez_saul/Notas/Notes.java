@@ -1,6 +1,8 @@
 package com.example.teamwork_alvarezlopez_saul.Notas;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -81,6 +83,23 @@ public class Notes extends AppCompatActivity {
         });
     }
 
+    private void showAlert(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                FirebaseAuth.getInstance().signOut();
+                finishAffinity();
+            }
+        });
+        builder.setNegativeButton("Cancelar", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         gestos.onTouchEvent(event);
@@ -88,10 +107,8 @@ public class Notes extends AppCompatActivity {
     }
 
     class GestureListener extends GestureDetector.SimpleOnGestureListener{
-        @Override
         public boolean onDoubleTap(@NonNull MotionEvent e) {
-            FirebaseAuth.getInstance().signOut();
-            finishAffinity();
+            showAlert("Aviso", "¿Estás seguro que quieres cerrar sesión?");
             return true;
         }
     }
