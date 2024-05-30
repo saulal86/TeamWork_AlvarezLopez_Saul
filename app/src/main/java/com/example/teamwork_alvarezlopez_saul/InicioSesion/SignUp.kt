@@ -66,6 +66,19 @@ class SignUp : AppCompatActivity() {
             FirebaseAuth.getInstance().signOut()
         }
     }
+    private fun getGoogleClientId(context: Context): String {
+        try {
+            val resources = context.resources
+            val packageName = context.packageName
+            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
+            if (resourceId != 0) {
+                return resources.getString(resourceId)
+            }
+        } catch (e: Resources.NotFoundException) {
+            e.printStackTrace()
+        }
+        return ""
+    }
 
     private fun setup() {
         title = "Autenticación"
@@ -110,6 +123,42 @@ class SignUp : AppCompatActivity() {
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
             finish()
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == GOOGLE_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+
+            try {
+                val account = task.getResult(ApiException::class.java)
+
+                if (account != null) {
+                    val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+                    FirebaseAuth.getInstance().signInWithCredential(credential)
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                val user = FirebaseAuth.getInstance().currentUser
+                                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
+                                    if (verificationTask.isSuccessful) {
+                                        showEmailNotVerifiedAlert()
+                                    } else {
+                                        val error = verificationTask.exception?.message ?: "Error desconocido"
+                                        showAlert("Error", "Error al enviar el correo de verificación: $error")
+                                    }
+                                }
+                            } else {
+                                val error = it.exception?.message ?: "Error desconocido"
+                                showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")
+                            }
+                        }
+                }
+            } catch (e: ApiException) {
+                e.printStackTrace()
+                showAlert("Error", "Error de autenticación de Google: ${e.localizedMessage}")
+            }
         }
     }
 
@@ -169,51 +218,7 @@ class SignUp : AppCompatActivity() {
         finish()
     }
 
-    private fun getGoogleClientId(context: Context): String {
-        try {
-            val resources = context.resources
-            val packageName = context.packageName
-            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
-            if (resourceId != 0) {
-                return resources.getString(resourceId)
-            }
-        } catch (e: Resources.NotFoundException) {
-            e.printStackTrace()
-        }
-        return ""
-    }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == GOOGLE_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
 
-            try {
-                val account = task.getResult(ApiException::class.java)
-
-                if (account != null) {
-                    val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-
-                    FirebaseAuth.getInstance().signInWithCredential(credential)
-                        .addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                val user = FirebaseAuth.getInstance().currentUser
-                                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
-                                    if (verificationTask.isSuccessful) {
-                                        showEmailNotVerifiedAlert()
-                                    } else {
-                                        showAlert("Error", "Error al enviar el correo de verificación")
-                                    }
-                                }
-                            } else {
-                                showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
-                            }
-                        }
-                }
-            } catch (e: ApiException) {
-                e.printStackTrace()
-            }
-        }
-    }
 }

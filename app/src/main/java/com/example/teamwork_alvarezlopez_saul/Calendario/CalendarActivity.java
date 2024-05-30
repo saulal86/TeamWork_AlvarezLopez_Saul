@@ -2,15 +2,23 @@ package com.example.teamwork_alvarezlopez_saul.Calendario;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -20,6 +28,7 @@ public class CalendarActivity extends AppCompatActivity {
 
     private ArrayList<CalendarConstructor> projectList;
     private CalendarAdapter projectAdapter;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +37,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         projectList = new ArrayList<>();
         projectAdapter = new CalendarAdapter(this, projectList);
+        databaseReference = FirebaseDatabase.getInstance().getReference("proyectos");
 
         ListView listViewProjects = findViewById(R.id.listViewProjects);
         listViewProjects.setAdapter(projectAdapter);
@@ -37,6 +47,27 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showAddProjectDialog();
+            }
+        });
+
+        loadProjectsFromFirebase();
+    }
+
+    private void loadProjectsFromFirebase() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                projectList.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    CalendarConstructor proyecto = snapshot.getValue(CalendarConstructor.class);
+                    projectList.add(proyecto);
+                }
+                projectAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.d("Error", "Hubo un error al almacenar los datos");
             }
         });
     }
@@ -76,7 +107,9 @@ public class CalendarActivity extends AppCompatActivity {
                 String dueDate = editTextDueDate.getText().toString();
 
                 if (!projectName.isEmpty() && !subject.isEmpty() && !description.isEmpty() && !dueDate.isEmpty()) {
+                    String projectId = databaseReference.push().getKey();
                     CalendarConstructor newProject = new CalendarConstructor(projectName, subject, description, dueDate);
+                    databaseReference.child(projectId).setValue(newProject);
                     projectList.add(newProject);
                     projectAdapter.notifyDataSetChanged();
                     dialog.dismiss();

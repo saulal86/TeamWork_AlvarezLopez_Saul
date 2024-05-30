@@ -3,7 +3,6 @@ package com.example.teamwork_alvarezlopez_saul.Notas;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,10 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-
-import com.example.teamwork_alvarezlopez_saul.InicioSesion.LogIn;
 import com.example.teamwork_alvarezlopez_saul.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +27,9 @@ import java.io.OutputStreamWriter;
 public class Notes extends AppCompatActivity {
     EditText editor, nombrearchivo;
     Button botoncrear, botoneditar;
+    FloatingActionButton infoButton;
     private GestureDetector gestos;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +39,8 @@ public class Notes extends AppCompatActivity {
         nombrearchivo = findViewById(R.id.nombrearchivo);
         botoncrear = findViewById(R.id.botoncrear);
         botoneditar = findViewById(R.id.botoneditar);
-        gestos = new GestureDetector(this, (GestureDetector.OnGestureListener) new GestureListener());
+        infoButton = findViewById(R.id.info);
+        gestos = new GestureDetector(this, new GestureListener());
 
         botoncrear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,7 +54,7 @@ public class Notes extends AppCompatActivity {
                     archivo.close();
                     editor.setText("");
                     nombrearchivo.setText("");
-                    Toast.makeText(Notes.this, "El archivo fue creado con exito y sus datos fueron insertados", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Notes.this, "El archivo fue creado con éxito y sus datos fueron insertados", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     Toast.makeText(Notes.this, "No se pudo crear el archivo", Toast.LENGTH_SHORT).show();
                 }
@@ -81,6 +82,12 @@ public class Notes extends AppCompatActivity {
                 }
             }
         });
+        infoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAlert("Información", "Si presionas dos veces sobre el fondo de esta pantalla cerrarás sesión y la aplicación se cerrará.");
+            }
+        });
     }
 
     private void showAlert(String title, String message) {
@@ -99,14 +106,14 @@ public class Notes extends AppCompatActivity {
         dialog.show();
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         gestos.onTouchEvent(event);
         return super.onTouchEvent(event);
     }
 
-    class GestureListener extends GestureDetector.SimpleOnGestureListener{
+    class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
         public boolean onDoubleTap(@NonNull MotionEvent e) {
             showAlert("Aviso", "¿Estás seguro que quieres cerrar sesión?");
             return true;
