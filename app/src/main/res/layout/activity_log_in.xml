@@ -4,16 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF9933"
+    android:background="@color/md_theme_inversePrimary_highContrast"
     android:id="@+id/LogInLayout"
     android:theme="@style/AppTheme"
     tools:context=".InicioSesion.LogIn">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:textSize="22dp"
+        android:textSize="28dp"
         android:text="¡Bienvenido, inicia sesión para acceder!"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.500"
@@ -106,11 +109,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/textoregistrarse"
         android:text="¿No estás registrado?, ¡haz click aqui para crear una cuenta!"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.500"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.849" />
+        app:layout_constraintVertical_bias="0.860" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

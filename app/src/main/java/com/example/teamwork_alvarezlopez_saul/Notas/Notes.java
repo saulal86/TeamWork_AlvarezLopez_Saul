@@ -3,6 +3,7 @@ package com.example.teamwork_alvarezlopez_saul.Notas;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamwork_alvarezlopez_saul.Calendario.CalendarActivity;
 import com.example.teamwork_alvarezlopez_saul.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -85,12 +87,23 @@ public class Notes extends AppCompatActivity {
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlert("Información", "Si presionas dos veces sobre el fondo de esta pantalla cerrarás sesión y la aplicación se cerrará.");
+                showInfoAlert("Información", "-Si presionas dos veces en el fondo de la aplicación cerrarando así sesión y también la aplicación\n" +
+                        "\n-Si deslizas de derecha a izquierda accederás al calendario de actividades");
             }
         });
     }
 
-    private void showAlert(String title, String message) {
+    private void showInfoAlert(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("Aceptar", null);
+        builder.setNegativeButton("Cancelar", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showSignOutAlert(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
@@ -115,7 +128,17 @@ public class Notes extends AppCompatActivity {
     class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDoubleTap(@NonNull MotionEvent e) {
-            showAlert("Aviso", "¿Estás seguro que quieres cerrar sesión?");
+            showSignOutAlert("Aviso", "¿Estás seguro que quieres cerrar sesión?");
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
+            if(e2.getX() < e1.getX()){
+                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                startActivity(intent);
+                finish();
+            }
             return true;
         }
     }

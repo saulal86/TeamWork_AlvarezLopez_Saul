@@ -53,31 +53,13 @@ class SignUp : AppCompatActivity() {
         super.onStart()
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            if (currentUser.isEmailVerified) {
                 SignUpLayout.visibility = View.INVISIBLE
                 showHome(currentUser.email ?: "", ProviderType.BASIC)
-            } else {
-                val intent = Intent(this, LogIn::class.java)
-                startActivity(intent)
-                finish()
-            }
-        } else {
+        }
+        else {
             SignUpLayout.visibility = View.VISIBLE
             FirebaseAuth.getInstance().signOut()
         }
-    }
-    private fun getGoogleClientId(context: Context): String {
-        try {
-            val resources = context.resources
-            val packageName = context.packageName
-            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
-            if (resourceId != 0) {
-                return resources.getString(resourceId)
-            }
-        } catch (e: Resources.NotFoundException) {
-            e.printStackTrace()
-        }
-        return ""
     }
 
     private fun setup() {
@@ -95,7 +77,7 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 val user = task.result?.user
-                                showHomeOrVerifyEmail(email, ProviderType.GOOGLE)
+                                showHomeOrVerifyEmail(email, ProviderType.BASIC)
                             } else {
                                 showAlert("Error", "Se ha producido un error autenticando al usuario")
                             }
@@ -125,6 +107,7 @@ class SignUp : AppCompatActivity() {
             finish()
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -141,14 +124,7 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val user = FirebaseAuth.getInstance().currentUser
-                                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
-                                    if (verificationTask.isSuccessful) {
-                                        showEmailNotVerifiedAlert()
-                                    } else {
-                                        val error = verificationTask.exception?.message ?: "Error desconocido"
-                                        showAlert("Error", "Error al enviar el correo de verificación: $error")
-                                    }
-                                }
+                                showHome(user?.email ?: "", ProviderType.GOOGLE)
                             } else {
                                 val error = it.exception?.message ?: "Error desconocido"
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")
@@ -160,6 +136,20 @@ class SignUp : AppCompatActivity() {
                 showAlert("Error", "Error de autenticación de Google: ${e.localizedMessage}")
             }
         }
+    }
+
+    private fun getGoogleClientId(context: Context): String {
+        try {
+            val resources = context.resources
+            val packageName = context.packageName
+            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
+            if (resourceId != 0) {
+                return resources.getString(resourceId)
+            }
+        } catch (e: Resources.NotFoundException) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     private fun validateEmail(email: String): Boolean {
@@ -176,19 +166,10 @@ class SignUp : AppCompatActivity() {
         return isValid
     }
 
-    private fun showAlert(title: String, message: String) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-        builder.setMessage(message)
-        builder.setPositiveButton("Aceptar", null)
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
-
     private fun showHomeOrVerifyEmail(email: String, provider: ProviderType) {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null && currentUser.isEmailVerified) {
-            // El usuario ha verificado su correo electrónico, así que procedemos a la pantalla principal
+        if (provider == ProviderType.GOOGLE || (currentUser != null && currentUser.isEmailVerified)) {
+            // El usuario ha verificado su correo electrónico o está usando Google como proveedor, así que procedemos a la pantalla principal
             showHome(email, provider)
         } else {
             // El usuario no ha verificado su correo electrónico, mostrar un mensaje o llevarlo a una pantalla de verificación de correo electrónico
@@ -203,7 +184,7 @@ class SignUp : AppCompatActivity() {
         builder.setMessage("Recuerda verificar tu correo electrónico para mayor seguridad.")
         builder.setPositiveButton("Aceptar") { _, _ ->
             // Llama a showHome al presionar Aceptar
-            showHome(emailEditText.text.toString(), ProviderType.GOOGLE)
+            showHome(emailEditText.text.toString(), ProviderType.BASIC)
         }
         val dialog: AlertDialog = builder.create()
         dialog.show()
@@ -218,7 +199,12 @@ class SignUp : AppCompatActivity() {
         finish()
     }
 
-
-
-
+    private fun showAlert(title: String, message: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setMessage(message)
+        builder.setPositiveButton("Aceptar", null)
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
 }
