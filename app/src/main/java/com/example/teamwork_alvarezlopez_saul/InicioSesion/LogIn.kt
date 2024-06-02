@@ -6,7 +6,6 @@ import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -14,7 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
-import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.ProviderType
+import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -61,7 +60,7 @@ class LogIn : AppCompatActivity() {
                     if(task.isSuccessful){
                         val user = task.result?.user
                         if (user != null && user.isEmailVerified) {
-                            showHome(user.email ?: "", ProviderType.BASIC)
+                            showHome(user.email ?: "",user?.uid ?: "", ProviderType.BASIC,)
                         } else {
                             showAlert("Error", "Debes verificar tu correo electrónico antes de iniciar sesión")
                         }
@@ -117,9 +116,10 @@ class LogIn : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showHome (email: String, provider: ProviderType){
+    private fun showHome(email: String, userId: String, provider: ProviderType) {
         val homeIntent = Intent(this, Notes::class.java).apply {
             putExtra("email", email)
+            putExtra("userId", userId)
             putExtra("provider", provider.name)
         }
         startActivity(homeIntent)
@@ -157,7 +157,8 @@ class LogIn : AppCompatActivity() {
                         .addOnCompleteListener {
 
                             if (it.isSuccessful) {
-                                showHome(account.email ?: "", ProviderType.GOOGLE)
+                                val user = FirebaseAuth.getInstance().currentUser
+                                showHome(account.email ?: "",user?.uid ?: "", ProviderType.GOOGLE)
                             } else {
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                             }

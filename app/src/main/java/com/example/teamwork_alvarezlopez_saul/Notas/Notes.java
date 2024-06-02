@@ -31,11 +31,12 @@ public class Notes extends AppCompatActivity {
     Button botoncrear, botoneditar;
     FloatingActionButton infoButton;
     private GestureDetector gestos;
+    private String userId; // Variable para almacenar userId
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editor_textos);
+        setContentView(R.layout.activity_notes);
 
         editor = findViewById(R.id.editor);
         nombrearchivo = findViewById(R.id.nombrearchivo);
@@ -43,6 +44,9 @@ public class Notes extends AppCompatActivity {
         botoneditar = findViewById(R.id.botoneditar);
         infoButton = findViewById(R.id.info);
         gestos = new GestureDetector(this, new GestureListener());
+
+        // Obtener los datos de la intención
+        userId = getIntent().getStringExtra("userId");
 
         botoncrear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,11 +88,22 @@ public class Notes extends AppCompatActivity {
                 }
             }
         });
+
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showInfoAlert("Información", "-Si presionas dos veces en el fondo de la aplicación cerrarando así sesión y también la aplicación\n" +
                         "\n-Si deslizas de derecha a izquierda accederás al calendario de actividades");
+            }
+        });
+
+        FloatingActionButton calendario = findViewById(R.id.calendario);
+        calendario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                intent.putExtra("userId", userId);
+                startActivity(intent);
             }
         });
     }
@@ -135,11 +150,16 @@ public class Notes extends AppCompatActivity {
         @Override
         public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
             if(e2.getX() < e1.getX()){
-                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
-                startActivity(intent);
-                finish();
+                openCalendarActivity();
             }
             return true;
         }
+    }
+
+    private void openCalendarActivity() {
+        Intent intent = new Intent(this, CalendarActivity.class);
+        intent.putExtra("userId", userId); // Pasar el userId
+        startActivity(intent);
+        finish();
     }
 }

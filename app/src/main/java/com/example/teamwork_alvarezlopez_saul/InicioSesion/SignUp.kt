@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion.ProviderType
+import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -53,10 +53,9 @@ class SignUp : AppCompatActivity() {
         super.onStart()
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-                SignUpLayout.visibility = View.INVISIBLE
-                showHome(currentUser.email ?: "", ProviderType.BASIC)
-        }
-        else {
+            SignUpLayout.visibility = View.INVISIBLE
+            showHome(currentUser.email ?: "", currentUser.uid, ProviderType.BASIC)
+        } else {
             SignUpLayout.visibility = View.VISIBLE
             FirebaseAuth.getInstance().signOut()
         }
@@ -77,7 +76,7 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 val user = task.result?.user
-                                showHomeOrVerifyEmail(email, ProviderType.BASIC)
+                                showHomeOrVerifyEmail(email, user?.uid ?: "", ProviderType.BASIC)
                             } else {
                                 showAlert("Error", "Se ha producido un error autenticando al usuario")
                             }
@@ -124,7 +123,7 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val user = FirebaseAuth.getInstance().currentUser
-                                showHome(user?.email ?: "", ProviderType.GOOGLE)
+                                showHome(user?.email ?: "", user?.uid ?: "", ProviderType.GOOGLE)
                             } else {
                                 val error = it.exception?.message ?: "Error desconocido"
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")
@@ -166,33 +165,34 @@ class SignUp : AppCompatActivity() {
         return isValid
     }
 
-    private fun showHomeOrVerifyEmail(email: String, provider: ProviderType) {
+    private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (provider == ProviderType.GOOGLE || (currentUser != null && currentUser.isEmailVerified)) {
             // El usuario ha verificado su correo electrónico o está usando Google como proveedor, así que procedemos a la pantalla principal
-            showHome(email, provider)
+            showHome(email, userId, provider)
         } else {
             // El usuario no ha verificado su correo electrónico, mostrar un mensaje o llevarlo a una pantalla de verificación de correo electrónico
             currentUser?.sendEmailVerification()
-            showEmailNotVerifiedAlert()
+            showEmailNotVerifiedAlert(email, userId, provider)
         }
     }
 
-    private fun showEmailNotVerifiedAlert() {
+    private fun showEmailNotVerifiedAlert(email: String, userId: String, provider: ProviderType) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Correo electrónico no verificado")
         builder.setMessage("Recuerda verificar tu correo electrónico para mayor seguridad.")
         builder.setPositiveButton("Aceptar") { _, _ ->
             // Llama a showHome al presionar Aceptar
-            showHome(emailEditText.text.toString(), ProviderType.BASIC)
+            showHome(email, userId, provider)
         }
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
 
-    private fun showHome(email: String, provider: ProviderType) {
+    private fun showHome(email: String, userId: String, provider: ProviderType) {
         val homeIntent = Intent(this, Notes::class.java).apply {
             putExtra("email", email)
+            putExtra("userId", userId)
             putExtra("provider", provider.name)
         }
         startActivity(homeIntent)

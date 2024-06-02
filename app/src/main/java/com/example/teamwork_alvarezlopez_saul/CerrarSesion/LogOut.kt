@@ -1,4 +1,4 @@
-package com.example.teamwork_alvarezlopez_saul.Cerrar_Sesion
+package com.example.teamwork_alvarezlopez_saul.CerrarSesion
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity

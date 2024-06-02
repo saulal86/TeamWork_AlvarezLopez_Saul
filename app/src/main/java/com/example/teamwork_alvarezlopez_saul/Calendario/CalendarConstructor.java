@@ -1,6 +1,7 @@
 package com.example.teamwork_alvarezlopez_saul.Calendario;
 
 public class CalendarConstructor {
+    private String id;
     private String nombre;
     private String asignatura;
     private String descripcion;
@@ -10,11 +11,20 @@ public class CalendarConstructor {
         // Constructor vacío requerido para Firebase
     }
 
-    public CalendarConstructor(String nombre, String asignatura, String descripcion, String fecha) {
+    public CalendarConstructor(String id, String nombre, String asignatura, String descripcion, String fecha) {
+        this.id = id;
         this.nombre = nombre;
         this.asignatura = asignatura;
         this.descripcion = descripcion;
         this.fecha = fecha;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNombre() {

@@ -29,12 +29,10 @@ public class CalendarAdapter extends ArrayAdapter<CalendarConstructor> {
         TextView textViewDescription = convertView.findViewById(R.id.textViewDescription);
         TextView textViewDueDate = convertView.findViewById(R.id.textViewDueDate);
 
-
         textViewProjectName.setText(calendar_constructor.getNombre());
         textViewSubject.setText(calendar_constructor.getAsignatura());
         textViewDescription.setText(calendar_constructor.getDescripcion());
         textViewDueDate.setText(calendar_constructor.getFecha());
-
 
         return convertView;
     }

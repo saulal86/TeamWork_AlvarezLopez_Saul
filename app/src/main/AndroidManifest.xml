@@ -35,7 +35,7 @@
             android:name=".InicioSesion.LogIn"
             android:exported="false" />
         <activity
-            android:name=".Cerrar_Sesion.HomeActivity"
+            android:name=".CerrarSesion.HomeActivity"
             android:exported="false" />
     </application>
 
