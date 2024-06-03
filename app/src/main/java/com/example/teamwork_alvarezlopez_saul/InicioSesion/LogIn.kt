@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
@@ -20,6 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LogIn : AppCompatActivity() {
 
@@ -48,19 +50,22 @@ class LogIn : AppCompatActivity() {
         setup()
     }
 
-
-    private fun setup(){
+    private fun setup() {
         title = "Autenticación"
 
-        // Listener para el botón de registro
-        loginButton.setOnClickListener{
+        // Listener para el botón de inicio de sesión
+        loginButton.setOnClickListener {
             if (emailEditText.text.isNotEmpty() && contraseñaEditText.text.isNotEmpty()) {
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(emailEditText.text.toString(),
-                    contraseñaEditText.text.toString()).addOnCompleteListener { task ->
-                    if(task.isSuccessful){
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(
+                    emailEditText.text.toString(),
+                    contraseñaEditText.text.toString()
+                ).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
                         val user = task.result?.user
                         if (user != null && user.isEmailVerified) {
-                            showHome(user.email ?: "",user?.uid ?: "", ProviderType.BASIC,)
+                            val correo = emailEditText.text.toString()
+                            saveUserEmailToFirestore(correo)
+                            showHome(user.email ?: "", user.uid ?: "", ProviderType.BASIC)
                         } else {
                             showAlert("Error", "Debes verificar tu correo electrónico antes de iniciar sesión")
                         }
@@ -73,7 +78,8 @@ class LogIn : AppCompatActivity() {
             }
         }
 
-        googleButton.setOnClickListener{
+        // Listener para el botón de Google
+        googleButton.setOnClickListener {
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getGoogleClientId(this)).requestEmail().build()
 
@@ -83,34 +89,34 @@ class LogIn : AppCompatActivity() {
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
         }
 
-        textoregistrarse.setOnClickListener{
+        // Listener para el texto de registro
+        textoregistrarse.setOnClickListener {
             Log.d("LogInActivity", "textoregistrarse clicked")
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
             finish()
         }
+    }
 
-//        textoiniciarsesionlogin.setOnClickListener{
-//            val intent = Intent(this, SignUp::class.java)
-//            startActivity(intent)
-//            finish()
-//        }
+    private fun saveUserEmailToFirestore(email: String) {
+        val database = FirebaseFirestore.getInstance()
+        val data: HashMap<String, String> = HashMap()
+        data["correo"] = email
+        database.collection("usuarios")
+            .add(data)
+            .addOnSuccessListener {
+                Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showAlert(title: String, message: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setMessage(message)
-        builder.setPositiveButton("Aceptar", null)
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
-    private fun showEmailVerificationSentAlert() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Verificación de correo electrónico")
-        builder.setMessage("Se ha enviado un correo de verificación. Por favor, verifica tu correo " +
-                "antes de iniciar sesión. Cuando haya verificado su correo electrónico inicie sesión.")
         builder.setPositiveButton("Aceptar", null)
         val dialog: AlertDialog = builder.create()
         dialog.show()
@@ -126,7 +132,7 @@ class LogIn : AppCompatActivity() {
         finish()
     }
 
-        private fun getGoogleClientId(context: Context): String {
+    private fun getGoogleClientId(context: Context): String {
         try {
             val resources = context.resources
             val packageName = context.packageName
@@ -150,22 +156,23 @@ class LogIn : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
 
                 if (account != null) {
-
                     val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
                     FirebaseAuth.getInstance().signInWithCredential(credential)
                         .addOnCompleteListener {
-
                             if (it.isSuccessful) {
                                 val user = FirebaseAuth.getInstance().currentUser
-                                showHome(account.email ?: "",user?.uid ?: "", ProviderType.GOOGLE)
+                                val email = account.email ?: ""
+                                saveUserEmailToFirestore(email)
+                                showHome(email, user?.uid ?: "", ProviderType.GOOGLE)
                             } else {
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión.")
                             }
                         }
                 }
-            }catch (e: ApiException){
+            } catch (e: ApiException) {
                 e.printStackTrace()
+                showAlert("Error", "Error de autenticación de Google: ${e.localizedMessage}")
             }
         }
     }

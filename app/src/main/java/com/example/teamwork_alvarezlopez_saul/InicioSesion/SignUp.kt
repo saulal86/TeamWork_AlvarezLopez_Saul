@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -21,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUp : AppCompatActivity() {
     private lateinit var signUpButton: Button
@@ -76,6 +78,7 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 val user = task.result?.user
+                                saveUserEmailToFirestore(email)
                                 showHomeOrVerifyEmail(email, user?.uid ?: "", ProviderType.BASIC)
                             } else {
                                 showAlert("Error", "Se ha producido un error autenticando al usuario")
@@ -123,7 +126,9 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val user = FirebaseAuth.getInstance().currentUser
-                                showHome(user?.email ?: "", user?.uid ?: "", ProviderType.GOOGLE)
+                                val email = account.email ?: ""
+                                saveUserEmailToFirestore(email)
+                                showHome(email, user?.uid ?: "", ProviderType.GOOGLE)
                             } else {
                                 val error = it.exception?.message ?: "Error desconocido"
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")
@@ -163,6 +168,20 @@ class SignUp : AppCompatActivity() {
         val isValid = passwordPattern.matches(password)
         Log.d("SignUp", "Password validation for $password: $isValid")
         return isValid
+    }
+
+    private fun saveUserEmailToFirestore(email: String) {
+        val database = FirebaseFirestore.getInstance()
+        val data: HashMap<String, String> = HashMap()
+        data["correo"] = email
+        database.collection("usuarios")
+            .add(data)
+            .addOnSuccessListener {
+                Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {

@@ -32,7 +32,6 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 
 import com.example.teamwork_alvarezlopez_saul.R;
 
@@ -115,7 +114,7 @@ public class CalendarActivity extends AppCompatActivity {
         });
     }
 
-    public void deleteProject(int position) {
+    private void deleteProject(int position) {
         CalendarConstructor projectToDelete = projectList.get(position);
         String projectId = projectToDelete.getId();
 
