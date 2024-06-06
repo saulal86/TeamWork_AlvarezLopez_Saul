@@ -22,8 +22,6 @@ import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.common.base.Objects
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
@@ -87,7 +85,8 @@ class SignUp : AppCompatActivity() {
                                 val user = task.result?.user
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
-                                saveUserEmailToFirestore(userId, email)
+                                Log.d("SignUp", "User ID saved: $userId")
+                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
                                 showHomeOrVerifyEmail(email, userId, ProviderType.BASIC)
                                 getToken()
                             } else {
@@ -101,7 +100,6 @@ class SignUp : AppCompatActivity() {
                 showAlert("Error", "Email o contraseña no válidos")
             }
         }
-
 
         googleButton.setOnClickListener {
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -139,7 +137,7 @@ class SignUp : AppCompatActivity() {
                                 val email = account.email ?: ""
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
-                                saveUserEmailToFirestore(userId, email)
+                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
                                 showHome(email, userId, ProviderType.GOOGLE)
                                 getToken()
                             } else {
@@ -183,10 +181,11 @@ class SignUp : AppCompatActivity() {
         return isValid
     }
 
-    private fun saveUserEmailToFirestore(userId: String, email: String) {
+    private fun saveUserToFirestore(userId: String, email: String) {
         val database = FirebaseFirestore.getInstance()
         val data: HashMap<String, Any> = HashMap()
         data[Constantes.KEY_EMAIL] = email
+        data[Constantes.KEY_USERS_ID] = userId
         val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
 
         documentReference.set(data)
@@ -198,14 +197,11 @@ class SignUp : AppCompatActivity() {
             }
     }
 
-
     private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (provider == ProviderType.GOOGLE || (currentUser != null && currentUser.isEmailVerified)) {
-            // El usuario ha verificado su correo electrónico o está usando Google como proveedor, así que procedemos a la pantalla principal
             showHome(email, userId, provider)
         } else {
-            // El usuario no ha verificado su correo electrónico, mostrar un mensaje o llevarlo a una pantalla de verificación de correo electrónico
             currentUser?.sendEmailVerification()
             showEmailNotVerifiedAlert(email, userId, provider)
         }
@@ -216,7 +212,6 @@ class SignUp : AppCompatActivity() {
         builder.setTitle("Correo electrónico no verificado")
         builder.setMessage("Recuerda verificar tu correo electrónico para mayor seguridad.")
         builder.setPositiveButton("Aceptar") { _, _ ->
-            // Llama a showHome al presionar Aceptar
             showHome(email, userId, provider)
         }
         val dialog: AlertDialog = builder.create()
@@ -263,8 +258,6 @@ class SignUp : AppCompatActivity() {
         val database = FirebaseFirestore.getInstance()
         val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
 
-        Log.d("SignUp", "Updating token for userId: $userId with token: $token")
-
         if (userId.isEmpty() || token.isEmpty()) {
             Log.e("SignUp", "Invalid userId or token")
             showAlert("mal", "User ID or token is invalid")
@@ -273,18 +266,12 @@ class SignUp : AppCompatActivity() {
 
         val data: HashMap<String, Any> = HashMap()
         data[Constantes.KEY_FCM_TOKEN] = token
+        data[Constantes.KEY_USERS_ID] = userId
 
         documentReference.update(data)
-            .addOnSuccessListener {
-                Log.d("SignUp", "Token updated successfully for userId: $userId")
-                showAlert("bien", "se ha introducido correctamente el token")
-            }
             .addOnFailureListener { exception ->
                 Log.e("SignUp", "Error updating token: ${exception.message}")
                 showAlert("mal", "no se ha introducido el token: ${exception.message}")
             }
     }
-
-
 }
-

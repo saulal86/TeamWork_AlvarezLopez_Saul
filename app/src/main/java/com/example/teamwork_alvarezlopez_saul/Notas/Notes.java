@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teamwork_alvarezlopez_saul.Calendario.CalendarActivity;
+import com.example.teamwork_alvarezlopez_saul.Chat.MainActivity;
 import com.example.teamwork_alvarezlopez_saul.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -102,6 +103,16 @@ public class Notes extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                intent.putExtra("userId", userId);
+                startActivity(intent);
+            }
+        });
+
+        FloatingActionButton chat = findViewById(R.id.chat);
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra("userId", userId);
                 startActivity(intent);
             }
