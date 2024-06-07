@@ -1,10 +1,12 @@
 package com.example.teamwork_alvarezlopez_saul.Chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityUsersBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -13,10 +15,12 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersActivity extends AppCompatActivity {
+public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnUserClickListener {
 
     private ActivityUsersBinding binding;
     private PreferenceManager preferenceManager;
+    private List<User> users;
+    private UsersAdapter usersAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +28,10 @@ public class UsersActivity extends AppCompatActivity {
         binding = ActivityUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
+        users = new ArrayList<>();
+        usersAdapter = new UsersAdapter(users, this);
+        binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.usersRecyclerView.setAdapter(usersAdapter);
         getUsers();
     }
 
@@ -34,34 +42,21 @@ public class UsersActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     loading(false);
-                    String currentUserId = preferenceManager.getString(Constantes.KEY_USERS_ID);
-                    if (currentUserId == null) {
-                        Log.e("UsersActivity", "currentUserId is null");
-                        showErrorMessage();
-                        return;
-                    } else {
-                        Log.d("UsersActivity", "currentUserId: " + currentUserId);
-                    }
                     if (task.isSuccessful() && task.getResult() != null) {
-                        List<User> users = new ArrayList<>();
+                        users.clear(); // Clear the list to avoid duplications
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            if (currentUserId.equals(queryDocumentSnapshot.getId())) {
-                                continue;
-                            }
                             User user = new User();
                             user.email = queryDocumentSnapshot.getString(Constantes.KEY_EMAIL);
                             user.token = queryDocumentSnapshot.getString(Constantes.KEY_FCM_TOKEN);
                             users.add(user);
                         }
-                        if (users.size() > 0) {
-                            UsersAdapter usersAdapter = new UsersAdapter(users);
-                            binding.usersRecyclerView.setAdapter(usersAdapter);
+                        if (!users.isEmpty()) {
+                            usersAdapter.notifyDataSetChanged();
                             binding.usersRecyclerView.setVisibility(View.VISIBLE);
                         } else {
                             showErrorMessage();
                         }
                     } else {
-                        Log.e("UsersActivity", "Task not successful or result is null");
                         showErrorMessage();
                     }
                 });
@@ -72,11 +67,18 @@ public class UsersActivity extends AppCompatActivity {
         binding.textErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    private void loading(boolean isLoading) {
+    private void loading(Boolean isLoading) {
         if (isLoading) {
             binding.progressBar.setVisibility(View.VISIBLE);
         } else {
             binding.progressBar.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void onUserClick(User user) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(Constantes.KEY_USER, user);
+        startActivity(intent);
     }
 }

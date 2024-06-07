@@ -48,7 +48,6 @@
         <activity
             android:name=".Chat.MainActivity"
             android:exported="false" />
-
         <service
             android:name=".Chat.MessagingService"
             android:exported="true">

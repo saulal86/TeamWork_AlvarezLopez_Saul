@@ -9,5 +9,6 @@ public class Constantes {
     public static final String KEY_IS_SIGNED_IN = "isSignedIn";
     public static final String KEY_USERS_ID = "usuariosID";
     public static final String KEY_FCM_TOKEN = "fcmToken";
+    public static final String KEY_USER = "user";
 
 }
