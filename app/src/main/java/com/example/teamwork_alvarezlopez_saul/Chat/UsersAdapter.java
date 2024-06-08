@@ -15,11 +15,11 @@ import java.util.List;
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
     private final List<User> users;
-    private final OnUserClickListener onUserClickListener;
+    private final UserListener userListener;
 
-    public UsersAdapter(List<User> users, OnUserClickListener onUserClickListener) {
+    public UsersAdapter(List<User> users, UserListener userListener) {
         this.users = users;
-        this.onUserClickListener = onUserClickListener;
+        this.userListener = userListener;
     }
 
     @NonNull
@@ -51,11 +51,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
         void setUserData(User user) {
             binding.textEmail.setText(user.email);
-            binding.getRoot().setOnClickListener(v -> onUserClickListener.onUserClick(user));
+            binding.getRoot().setOnClickListener(v -> userListener.onUserClicked(user));
         }
-    }
-
-    public interface OnUserClickListener {
-        void onUserClick(User user);
     }
 }

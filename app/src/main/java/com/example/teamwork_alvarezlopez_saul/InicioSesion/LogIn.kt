@@ -16,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.Chat.Constantes
+import com.example.teamwork_alvarezlopez_saul.Chat.PreferenceManager
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -35,6 +36,7 @@ class LogIn : AppCompatActivity() {
     private lateinit var loginLayout: ConstraintLayout
     private lateinit var textoregistrarse: TextView
     private val GOOGLE_SIGN_IN = 100
+    private lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +50,12 @@ class LogIn : AppCompatActivity() {
         loginLayout = findViewById(R.id.LogInLayout)
         textoregistrarse = findViewById(R.id.textoregistrarse)
 
+        preferenceManager = PreferenceManager(applicationContext)
+
         // Configuración
         setup()
+
+        getToken()
     }
 
     private fun setup() {
@@ -65,8 +71,6 @@ class LogIn : AppCompatActivity() {
                     if (task.isSuccessful) {
                         val user = task.result?.user
                         if (user != null && user.isEmailVerified) {
-                            val correo = emailEditText.text.toString()
-                            saveUserEmailToFirestore(user.uid, correo)
                             showHome(user.email ?: "", user.uid ?: "", ProviderType.BASIC)
                         } else {
                             showAlert("Error", "Debes verificar tu correo electrónico antes de iniciar sesión")
@@ -101,49 +105,26 @@ class LogIn : AppCompatActivity() {
         }
     }
 
-    private fun saveUserEmailToFirestore(userId: String, email: String) {
-        val database = FirebaseFirestore.getInstance()
-        val data: HashMap<String, Any> = HashMap()
-        data[Constantes.KEY_EMAIL] = email
 
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
 
-        documentReference.set(data)
-            .addOnSuccessListener {
-                Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
-                getToken(userId)
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun getToken(userId: String) {
+    private fun getToken() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
-                    updateToken(userId, token)
+                    updateToken(token)
                 } else {
-                    showAlert("Error", "Error al obtener el token")
+                    Log.w("TAG", "Fetching FCM registration token failed", task.exception)
                 }
             }
     }
 
-    private fun updateToken(userId: String, token: String) {
+    private fun updateToken(token: String) {
         val database = FirebaseFirestore.getInstance()
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
+        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS)
+            .document(preferenceManager.getString(Constantes.KEY_USERS_ID))
 
-        val data: HashMap<String, Any> = HashMap()
-        data[Constantes.KEY_FCM_TOKEN] = token
-
-        documentReference.update(data)
-            .addOnSuccessListener {
-                showAlert("Bien", "El token se ha actualizado correctamente")
-            }
-            .addOnFailureListener { exception ->
-                showAlert("Error", "Error al actualizar el token: ${exception.message}")
-            }
+        documentReference.update(Constantes.KEY_FCM_TOKEN, token).addOnSuccessListener{ Toast.makeText(applicationContext, "Bien", Toast.LENGTH_SHORT).show() }.addOnFailureListener{exception -> showAlert("Error", "Token no actualizado")}
     }
 
     private fun showAlert(title: String, message: String) {
@@ -201,7 +182,6 @@ class LogIn : AppCompatActivity() {
                                 val user = FirebaseAuth.getInstance().currentUser
                                 val email = account.email ?: ""
                                 if (user != null) {
-                                    saveUserEmailToFirestore(user.uid, email)
                                     showHome(email, user.uid, ProviderType.GOOGLE)
                                 }
                             } else {

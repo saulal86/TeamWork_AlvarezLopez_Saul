@@ -2,11 +2,9 @@ package com.example.teamwork_alvarezlopez_saul.Chat;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityUsersBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -15,12 +13,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnUserClickListener {
+public class UsersActivity extends AppCompatActivity implements UserListener {
 
     private ActivityUsersBinding binding;
     private PreferenceManager preferenceManager;
-    private List<User> users;
-    private UsersAdapter usersAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +25,6 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnU
         binding = ActivityUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
-        users = new ArrayList<>();
-        usersAdapter = new UsersAdapter(users, this);
-        binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.usersRecyclerView.setAdapter(usersAdapter);
         getUsers();
     }
 
@@ -42,16 +35,23 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnU
                 .get()
                 .addOnCompleteListener(task -> {
                     loading(false);
+                    String currentUserId = preferenceManager.getString(Constantes.KEY_USERS_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
-                        users.clear(); // Clear the list to avoid duplications
+                        List<User> users = new ArrayList<>();
+                        users.clear();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            if (currentUserId.equals(queryDocumentSnapshot.getId())){
+                                continue;
+                            }
                             User user = new User();
                             user.email = queryDocumentSnapshot.getString(Constantes.KEY_EMAIL);
                             user.token = queryDocumentSnapshot.getString(Constantes.KEY_FCM_TOKEN);
+                            user.id = queryDocumentSnapshot.getId();
                             users.add(user);
                         }
-                        if (!users.isEmpty()) {
-                            usersAdapter.notifyDataSetChanged();
+                        if (users.size() > 0) {
+                            UsersAdapter usersAdapter = new UsersAdapter(users, this);
+                            binding.usersRecyclerView.setAdapter(usersAdapter);
                             binding.usersRecyclerView.setVisibility(View.VISIBLE);
                         } else {
                             showErrorMessage();
@@ -76,9 +76,11 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnU
     }
 
     @Override
-    public void onUserClick(User user) {
-        Intent intent = new Intent(this, ChatActivity.class);
+    public void onUserClicked(User user) {
+        Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constantes.KEY_USER, user);
         startActivity(intent);
+        finish();
     }
+
 }

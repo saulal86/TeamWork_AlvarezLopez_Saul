@@ -85,8 +85,6 @@ class SignUp : AppCompatActivity() {
                                 val user = task.result?.user
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
-                                Log.d("SignUp", "User ID saved: $userId")
-                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
                                 showHomeOrVerifyEmail(email, userId, ProviderType.BASIC)
                                 getToken()
                             } else {
@@ -97,7 +95,10 @@ class SignUp : AppCompatActivity() {
                     showAlert("Error", "Las contraseñas no coinciden")
                 }
             } else {
-                showAlert("Error", "Email o contraseña no válidos")
+                showAlert("Error", "Email o contraseña no válidos, el formato del " +
+                        "email debe ser 'ejemplo@algo.com/es' y el la contraseña debe de incluir 8 " +
+                        "dígitos en los cuales haya mayúsculas, minusculas, números y carácteres no " +
+                        "alfa numéricos")
             }
         }
 
@@ -137,7 +138,6 @@ class SignUp : AppCompatActivity() {
                                 val email = account.email ?: ""
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
-                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
                                 showHome(email, userId, ProviderType.GOOGLE)
                                 getToken()
                             } else {
@@ -181,21 +181,6 @@ class SignUp : AppCompatActivity() {
         return isValid
     }
 
-    private fun saveUserToFirestore(userId: String, email: String) {
-        val database = FirebaseFirestore.getInstance()
-        val data: HashMap<String, Any> = HashMap()
-        data[Constantes.KEY_EMAIL] = email
-        data[Constantes.KEY_USERS_ID] = userId
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
-
-        documentReference.set(data)
-            .addOnSuccessListener {
-                Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
-            }
-    }
 
     private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -242,36 +227,18 @@ class SignUp : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
-                    val userId = preferenceManager.getString(Constantes.KEY_USERS_ID)
-                    if (userId != null) {
-                        updateToken(userId, token)
-                    } else {
-                        showAlert("Error", "User ID is null")
-                    }
+                    updateToken(token)
                 } else {
-                    showAlert("mal", "Error al obtener el token")
+                    Log.w("TAG", "Fetching FCM registration token failed", task.exception)
                 }
             }
     }
 
-    private fun updateToken(userId: String, token: String) {
+    private fun updateToken(token: String) {
         val database = FirebaseFirestore.getInstance()
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
+        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS)
+            .document(preferenceManager.getString(Constantes.KEY_USERS_ID))
 
-        if (userId.isEmpty() || token.isEmpty()) {
-            Log.e("SignUp", "Invalid userId or token")
-            showAlert("mal", "User ID or token is invalid")
-            return
-        }
-
-        val data: HashMap<String, Any> = HashMap()
-        data[Constantes.KEY_FCM_TOKEN] = token
-        data[Constantes.KEY_USERS_ID] = userId
-
-        documentReference.update(data)
-            .addOnFailureListener { exception ->
-                Log.e("SignUp", "Error updating token: ${exception.message}")
-                showAlert("mal", "no se ha introducido el token: ${exception.message}")
-            }
+        documentReference.update(Constantes.KEY_FCM_TOKEN, token).addOnSuccessListener{ Toast.makeText(applicationContext, "Bien", Toast.LENGTH_SHORT).show() }.addOnFailureListener{exception -> showAlert("Error", "Token no actualizado")}
     }
 }
