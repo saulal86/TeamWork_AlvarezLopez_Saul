@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityUsersBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,6 +25,11 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
         super.onCreate(savedInstanceState);
         binding = ActivityUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Configura el RecyclerView
+        binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.usersRecyclerView.setHasFixedSize(true);
+
         preferenceManager = new PreferenceManager(getApplicationContext());
         getUsers();
     }
@@ -38,7 +44,6 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
                     String currentUserId = preferenceManager.getString(Constantes.KEY_USERS_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
                         List<User> users = new ArrayList<>();
-                        users.clear();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             if (currentUserId.equals(queryDocumentSnapshot.getId())){
                                 continue;
@@ -61,6 +66,7 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
                     }
                 });
     }
+
 
     private void showErrorMessage() {
         binding.textErrorMessage.setText(String.format("%s", "No user available"));

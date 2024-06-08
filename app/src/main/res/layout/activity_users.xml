@@ -39,21 +39,21 @@
         android:background="@drawable/background_content_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="@id/back">
-        
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/usersRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:overScrollMode="never"
-            android:padding="20dp"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-        
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="25dp"
-            android:layout_height="25dp"/>
+            android:layout_height="25dp"
+            android:layout_gravity="center"/>
 
         <TextView
             android:id="@+id/textErrorMessage"
@@ -68,8 +68,4 @@
             android:visibility="gone"/>
 
     </FrameLayout>
-
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
