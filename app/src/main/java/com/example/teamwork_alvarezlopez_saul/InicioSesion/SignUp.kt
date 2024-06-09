@@ -15,8 +15,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
-import com.example.teamwork_alvarezlopez_saul.Chat.Constantes
-import com.example.teamwork_alvarezlopez_saul.Chat.PreferenceManager
+import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes
+import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager
+import com.example.teamwork_alvarezlopez_saul.Home.Home
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -51,7 +52,10 @@ class SignUp : AppCompatActivity() {
         confirmarcontraseñaEditText = findViewById(R.id.confirmarcontraseñaEditText)
         textoiniciarsesion = findViewById(R.id.textoiniciarsesion)
         googleButton = findViewById(R.id.googlebutton)
-        preferenceManager = PreferenceManager(applicationContext)
+        preferenceManager =
+            PreferenceManager(
+                applicationContext
+            )
 
         // Configuración
         setup()
@@ -77,7 +81,7 @@ class SignUp : AppCompatActivity() {
             val password = contraseñaEditText.text.toString()
             val confirmPassword = confirmarcontraseñaEditText.text.toString()
 
-            if (validateEmail(email) && validatePassword(password)) {
+            if (validarEmail(email) && validarContraseña(password)) {
                 if (password == confirmPassword) {
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
@@ -85,6 +89,7 @@ class SignUp : AppCompatActivity() {
                                 val user = task.result?.user
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
+                                preferenceManager.putString(Constantes.KEY_EMAIL, email)
                                 showHomeOrVerifyEmail(email, userId, ProviderType.BASIC)
                                 getToken()
                             } else {
@@ -95,10 +100,7 @@ class SignUp : AppCompatActivity() {
                     showAlert("Error", "Las contraseñas no coinciden")
                 }
             } else {
-                showAlert("Error", "Email o contraseña no válidos, el formato del " +
-                        "email debe ser 'ejemplo@algo.com/es' y el la contraseña debe de incluir 8 " +
-                        "dígitos en los cuales haya mayúsculas, minusculas, números y carácteres no " +
-                        "alfa numéricos")
+                showAlert("Error", "Email o contraseña no válidos")
             }
         }
 
@@ -108,15 +110,137 @@ class SignUp : AppCompatActivity() {
 
             val googleClient = GoogleSignIn.getClient(this, googleConf)
             googleClient.signOut()
-
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
         }
 
         textoiniciarsesion.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            clearEditTexts()
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun validarEmail(email: String): Boolean {
+        val emailPattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.(com|es)$")
+        val isValid = emailPattern.matches(email)
+        Log.d("SignUp", "Email validation for $email: $isValid")
+        return isValid
+    }
+
+    private fun validarContraseña(password: String): Boolean {
+        val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,}$")
+        val isValid = passwordPattern.matches(password)
+        Log.d("SignUp", "Password validation for $password: $isValid")
+        return isValid
+    }
+
+    private fun clearEditTexts() {
+        emailEditText.text.clear()
+        contraseñaEditText.text.clear()
+        confirmarcontraseñaEditText.text.clear()
+    }
+
+    private fun showAlert(title: String, message: String) {
+        if (!isFinishing && !isDestroyed) {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(title)
+            builder.setMessage(message)
+            builder.setPositiveButton("Aceptar", null)
+            val dialog: AlertDialog = builder.create()
+            dialog.show()
+        } else {
+            Log.w("SignUpActivity", "La actividad no está en un estado válido para mostrar un diálogo.")
+        }
+    }
+
+    private fun showHome(email: String, userId: String, provider: ProviderType) {
+        val homeIntent = Intent(this, Home::class.java).apply {
+            putExtra("email", email)
+            putExtra("userId", userId)
+            putExtra("provider", provider.name)
+        }
+        startActivity(homeIntent)
+        finish()
+    }
+
+    private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.sendEmailVerification()?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                showAlert("Verificación", "Se ha enviado un correo de verificación a tu email.")
+            } else {
+                showAlert("Error", "No se pudo enviar el correo de verificación.")
+            }
+        }
+    }
+
+    private fun getToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    Log.d("SignUp", "FCM token: $token")
+                    updateToken(token)
+                } else {
+                    Log.w("SignUp", "Fetching FCM registration token failed", task.exception)
+                }
+            }
+    }
+
+    private fun updateToken(token: String) {
+        val userId = preferenceManager.getString(Constantes.KEY_USERS_ID)
+        Log.d("SignUp", "Updating token for user ID: $userId")
+
+        val database = FirebaseFirestore.getInstance()
+        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
+
+        documentReference.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val document = task.result
+                if (document != null && document.exists()) {
+                    // El documento existe, actualiza el token
+                    documentReference.update(Constantes.KEY_FCM_TOKEN, token)
+                        .addOnSuccessListener {
+                            Toast.makeText(applicationContext, "Token actualizado correctamente", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { exception ->
+                            showAlert("Error", "Token no actualizado: ${exception.localizedMessage}")
+                        }
+                } else {
+                    // El documento no existe, créalo y luego actualiza el token
+                    val userData = mapOf(
+                        Constantes.KEY_USERS_ID to userId,
+                        Constantes.KEY_EMAIL to preferenceManager.getString(Constantes.KEY_EMAIL),
+                        Constantes.KEY_FCM_TOKEN to token
+                    )
+                    documentReference.set(userData)
+                        .addOnSuccessListener {
+                            Toast.makeText(applicationContext, "Token actualizado correctamente", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { exception ->
+                            showAlert("Error", "Token no actualizado: ${exception.localizedMessage}")
+                        }
+                }
+            } else {
+                showAlert("Error", "Error al obtener el documento del usuario: ${task.exception?.localizedMessage}")
+            }
+        }
+    }
+
+    private fun getGoogleClientId(context: Context): String {
+        try {
+            val resources = context.resources
+            val packageName = context.packageName
+            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
+            if (resourceId != 0) {
+                return resources.getString(resourceId)
+            }
+        } catch (e: Resources.NotFoundException) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,7 +261,7 @@ class SignUp : AppCompatActivity() {
                                 val user = FirebaseAuth.getInstance().currentUser
                                 val email = account.email ?: ""
                                 val userId = user?.uid ?: ""
-                                preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
+                                preferenceManager.putString(Constantes.KEY_EMAIL, email)
                                 showHome(email, userId, ProviderType.GOOGLE)
                                 getToken()
                             } else {
@@ -151,94 +275,5 @@ class SignUp : AppCompatActivity() {
                 showAlert("Error", "Error de autenticación de Google: ${e.localizedMessage}")
             }
         }
-    }
-
-    private fun getGoogleClientId(context: Context): String {
-        try {
-            val resources = context.resources
-            val packageName = context.packageName
-            val resourceId = resources.getIdentifier("default_web_client_id", "string", packageName)
-            if (resourceId != 0) {
-                return resources.getString(resourceId)
-            }
-        } catch (e: Resources.NotFoundException) {
-            e.printStackTrace()
-        }
-        return ""
-    }
-
-    private fun validateEmail(email: String): Boolean {
-        val emailPattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.(com|es)$")
-        val isValid = emailPattern.matches(email)
-        Log.d("SignUp", "Email validation for $email: $isValid")
-        return isValid
-    }
-
-    private fun validatePassword(password: String): Boolean {
-        val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,}$")
-        val isValid = passwordPattern.matches(password)
-        Log.d("SignUp", "Password validation for $password: $isValid")
-        return isValid
-    }
-
-
-    private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (provider == ProviderType.GOOGLE || (currentUser != null && currentUser.isEmailVerified)) {
-            showHome(email, userId, provider)
-        } else {
-            currentUser?.sendEmailVerification()
-            showEmailNotVerifiedAlert(email, userId, provider)
-        }
-    }
-
-    private fun showEmailNotVerifiedAlert(email: String, userId: String, provider: ProviderType) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Correo electrónico no verificado")
-        builder.setMessage("Recuerda verificar tu correo electrónico para mayor seguridad.")
-        builder.setPositiveButton("Aceptar") { _, _ ->
-            showHome(email, userId, provider)
-        }
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
-
-    private fun showHome(email: String, userId: String, provider: ProviderType) {
-        val homeIntent = Intent(this, Notes::class.java).apply {
-            putExtra("email", email)
-            putExtra("userId", userId)
-            putExtra("provider", provider.name)
-        }
-        startActivity(homeIntent)
-        finish()
-    }
-
-    private fun showAlert(title: String, message: String) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-        builder.setMessage(message)
-        builder.setPositiveButton("Aceptar", null)
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
-
-    private fun getToken() {
-        FirebaseMessaging.getInstance().token
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val token = task.result
-                    updateToken(token)
-                } else {
-                    Log.w("TAG", "Fetching FCM registration token failed", task.exception)
-                }
-            }
-    }
-
-    private fun updateToken(token: String) {
-        val database = FirebaseFirestore.getInstance()
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS)
-            .document(preferenceManager.getString(Constantes.KEY_USERS_ID))
-
-        documentReference.update(Constantes.KEY_FCM_TOKEN, token).addOnSuccessListener{ Toast.makeText(applicationContext, "Bien", Toast.LENGTH_SHORT).show() }.addOnFailureListener{exception -> showAlert("Error", "Token no actualizado")}
     }
 }

@@ -1,4 +1,4 @@
-package com.example.teamwork_alvarezlopez_saul.Chat;
+package com.example.teamwork_alvarezlopez_saul.Chat.firebase;
 
 import android.util.Log;
 

@@ -1,12 +1,16 @@
-package com.example.teamwork_alvarezlopez_saul.Chat;
+package com.example.teamwork_alvarezlopez_saul.Chat.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes;
+import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager;
+import com.example.teamwork_alvarezlopez_saul.Chat.models.User;
+import com.example.teamwork_alvarezlopez_saul.Chat.listeners.UserListener;
+import com.example.teamwork_alvarezlopez_saul.Chat.adapters.UsersAdapter;
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityUsersBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -14,7 +18,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersActivity extends AppCompatActivity implements UserListener {
+public class UsersActivity extends BaseActivity implements UserListener {
 
     private ActivityUsersBinding binding;
     private PreferenceManager preferenceManager;
@@ -26,7 +30,6 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
         binding = ActivityUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Configura el RecyclerView
         binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.usersRecyclerView.setHasFixedSize(true);
 

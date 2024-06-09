@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">TeamWork_AlvarezLopez_Saul</string>
     <string name="prefs_file">com.example.pruebaproyecto_saul.PREFERENCE_FILE_KEY</string>
+    <string name="presentacion">Tu aplicación para llevar al día tus tareas y mantenerte en contacto con tus compañeros.</string>
+    <string name="notas">Al pulsar este botón en la barra de navegación inferior, la aplicacion te llevara a una pantalla para crear y editar notas o apuntes sobre alguna tarea o examen por hacer.</string>
+    <string name="agenda">Al pulsar este botón en la barra de navegación inferior, la aplicacion te llevara a una pantalla para crear ,editar y borrar actividades anotadas en una lista.</string>
+    <string name="chat">Al pulsar este botón en la barra de navegación inferior, la aplicacion te llevara a una pantalla para chatear con los demas usuarios de la aplicacion.</string>
+    <string name="logout">Al pulsar este botón en la barra de navegación inferior, cerraras sesión y tambien la app se cerrrará.</string>
 </resources>

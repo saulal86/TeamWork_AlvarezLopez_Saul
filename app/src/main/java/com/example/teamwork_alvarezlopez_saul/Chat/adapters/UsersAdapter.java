@@ -1,13 +1,13 @@
-package com.example.teamwork_alvarezlopez_saul.Chat;
+package com.example.teamwork_alvarezlopez_saul.Chat.adapters;
 
-import android.content.ClipData;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamwork_alvarezlopez_saul.Chat.models.User;
+import com.example.teamwork_alvarezlopez_saul.Chat.listeners.UserListener;
 import com.example.teamwork_alvarezlopez_saul.databinding.ItemContainerUserBinding;
 
 import java.util.List;

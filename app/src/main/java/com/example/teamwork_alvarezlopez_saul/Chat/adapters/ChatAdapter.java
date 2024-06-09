@@ -1,4 +1,4 @@
-package com.example.teamwork_alvarezlopez_saul.Chat;
+package com.example.teamwork_alvarezlopez_saul.Chat.adapters;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamwork_alvarezlopez_saul.Chat.models.ChatMessage;
 import com.example.teamwork_alvarezlopez_saul.databinding.ItemContainerReceivedMessageBinding;
 import com.example.teamwork_alvarezlopez_saul.databinding.ItemContainerSentMessageBinding;
 

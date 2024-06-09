@@ -15,11 +15,14 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".Chat.ChatActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:name=".Home.Home"
+            android:exported="false" />
         <activity
-            android:name=".Chat.UsersActivity"
+            android:name=".Chat.activities.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Chat.activities.UsersActivity"
             android:exported="false" />
         <activity
             android:name=".Calendario.CalendarActivity"
@@ -47,10 +50,11 @@
             android:name=".CerrarSesion.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".Chat.MainActivity"
+            android:name=".Chat.activities.MainActivity"
             android:exported="false" />
+
         <service
-            android:name=".Chat.MessagingService"
+            android:name=".Chat.firebase.MessagingService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
