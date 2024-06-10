@@ -59,6 +59,13 @@ public class CalendarActivity extends AppCompatActivity {
         ListView listViewProjects = findViewById(R.id.listViewProjects);
         listViewProjects.setAdapter(projectAdapter);
 
+        listViewProjects.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                showEditProjectDialog(position);
+            }
+        });
+
         listViewProjects.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -177,6 +184,62 @@ public class CalendarActivity extends AppCompatActivity {
         });
     }
 
+    private void showEditProjectDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_addwork, null);
+        builder.setView(dialogView);
+
+        final EditText editTextProjectName = dialogView.findViewById(R.id.editTextProjectName);
+        final EditText editTextSubject = dialogView.findViewById(R.id.editTextSubject);
+        final EditText editTextDescription = dialogView.findViewById(R.id.editTextDescription);
+        final EditText editTextDueDate = dialogView.findViewById(R.id.editTextDueDate);
+
+        final CalendarConstructor project = projectList.get(position);
+
+        editTextProjectName.setText(project.getNombre());
+        editTextSubject.setText(project.getAsignatura());
+        editTextDescription.setText(project.getDescripcion());
+        editTextDueDate.setText(project.getFecha());
+
+        editTextDueDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog(editTextDueDate);
+            }
+        });
+
+        builder.setTitle("Editar tarea")
+                .setPositiveButton("Guardar", null)
+                .setNegativeButton("Cancelar", (dialog, id) -> dialog.cancel());
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String projectName = editTextProjectName.getText().toString();
+                String subject = editTextSubject.getText().toString();
+                String description = editTextDescription.getText().toString();
+                String dueDate = editTextDueDate.getText().toString();
+
+                if (!projectName.isEmpty() && !subject.isEmpty() && !description.isEmpty() && !dueDate.isEmpty()) {
+                    project.setNombre(projectName);
+                    project.setAsignatura(subject);
+                    project.setDescripcion(description);
+                    project.setFecha(dueDate);
+                    updateProjectInFirebase(project);
+                    projectAdapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(CalendarActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void showDatePickerDialog(final EditText editTextDueDate) {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -192,5 +255,19 @@ public class CalendarActivity extends AppCompatActivity {
                     }
                 }, year, month, day);
         datePickerDialog.show();
+    }
+
+    private void updateProjectInFirebase(CalendarConstructor project) {
+        databaseReference.child(project.getId()).setValue(project)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(CalendarActivity.this, "Proyecto actualizado", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CalendarActivity.this, "Error al actualizar el proyecto", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 }
