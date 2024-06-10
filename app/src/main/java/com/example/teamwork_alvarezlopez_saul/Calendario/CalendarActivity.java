@@ -1,7 +1,6 @@
 package com.example.teamwork_alvarezlopez_saul.Calendario;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +14,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,7 +45,6 @@ public class CalendarActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
-        // Obtener userId de la Intent
         userId = getIntent().getStringExtra("userId");
         if (userId == null) {
             Toast.makeText(this, "Error: User ID no encontrado", Toast.LENGTH_SHORT).show();
@@ -102,7 +99,6 @@ public class CalendarActivity extends AppCompatActivity {
                     proyecto.setId(snapshot.getKey());
                     projectList.add(proyecto);
                 }
-                // Invertir el orden de projectList
                 Collections.reverse(projectList);
                 projectAdapter.notifyDataSetChanged();
             }
@@ -175,7 +171,6 @@ public class CalendarActivity extends AppCompatActivity {
                     projectAdapter.notifyDataSetChanged();
                     dialog.dismiss();
                 } else {
-                    // Manejar campos vacíos
                     Toast.makeText(CalendarActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
                 }
             }

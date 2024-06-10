@@ -1,12 +1,7 @@
 package com.example.teamwork_alvarezlopez_saul.Notas;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,25 +11,27 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.teamwork_alvarezlopez_saul.Calendario.CalendarActivity;
-import com.example.teamwork_alvarezlopez_saul.Chat.activities.MainActivity;
 import com.example.teamwork_alvarezlopez_saul.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Notes extends AppCompatActivity {
     EditText editor, nombrearchivo;
     Button botoncrear, botoneditar;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes);
+
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         editor = findViewById(R.id.editor);
         nombrearchivo = findViewById(R.id.nombrearchivo);
@@ -46,17 +43,20 @@ public class Notes extends AppCompatActivity {
             public void onClick(View v) {
                 String editortexto = editor.getText().toString();
                 String nombre = nombrearchivo.getText().toString();
-                try {
-                    OutputStreamWriter archivo = new OutputStreamWriter(openFileOutput(nombre, Context.MODE_PRIVATE));
-                    archivo.write(editortexto);
-                    archivo.flush();
-                    archivo.close();
-                    editor.setText("");
-                    nombrearchivo.setText("");
-                    Toast.makeText(Notes.this, "El archivo fue creado con éxito y sus datos fueron insertados", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(Notes.this, "No se pudo crear el archivo", Toast.LENGTH_SHORT).show();
-                }
+                String userId = mAuth.getCurrentUser().getUid();
+                Map<String, Object> note = new HashMap<>();
+                note.put("title", nombre);
+                note.put("content", editortexto);
+                note.put("userId", userId);
+
+                db.collection("notes")
+                        .add(note)
+                        .addOnSuccessListener(documentReference -> {
+                            editor.setText("");
+                            nombrearchivo.setText("");
+                            Toast.makeText(Notes.this, "Nota creada con éxito", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(Notes.this, "Error al crear la nota", Toast.LENGTH_SHORT).show());
             }
         });
 
@@ -64,25 +64,29 @@ public class Notes extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String nombre = nombrearchivo.getText().toString();
-                try {
-                    InputStreamReader archivo = new InputStreamReader(openFileInput(nombre));
-                    BufferedReader br = new BufferedReader(archivo);
-                    String linea = br.readLine();
-                    StringBuilder contenido = new StringBuilder();
-                    while (linea != null) {
-                        contenido.append(linea).append("\n");
-                        linea = br.readLine();
-                    }
-                    br.close();
-                    archivo.close();
-                    editor.setText(contenido.toString());
-                } catch (IOException e) {
-                    Toast.makeText(Notes.this, "No existe el archivo", Toast.LENGTH_SHORT).show();
-                }
+                String userId = mAuth.getCurrentUser().getUid();
+
+                db.collection("notes")
+                        .whereEqualTo("title", nombre)
+                        .whereEqualTo("userId", userId)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                DocumentReference docRef = task.getResult().getDocuments().get(0).getReference();
+                                docRef.get().addOnSuccessListener(documentSnapshot -> {
+                                    if (documentSnapshot.exists()) {
+                                        String content = documentSnapshot.getString("content");
+                                        editor.setText(content);
+                                    } else {
+                                        Toast.makeText(Notes.this, "No existe la nota", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(Notes.this, "No existe la nota", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(Notes.this, "Error al buscar la nota", Toast.LENGTH_SHORT).show());
             }
         });
-
-
     }
-
 }

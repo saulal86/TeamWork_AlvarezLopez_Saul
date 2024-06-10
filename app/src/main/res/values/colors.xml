@@ -148,4 +148,9 @@
     <style name="RoundButton">
         <item name="android:background">@drawable/round_button</item>
     </style>
+
+    <style name="BottomNavTextAppearance" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

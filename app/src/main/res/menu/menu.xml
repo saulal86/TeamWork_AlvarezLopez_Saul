@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/notas"
+        android:id="@+id/navigation_notas"
         android:icon="@drawable/baseline_edit_note_24"
-        android:title="Notas"
-        app:showAsAction="ifRoom"/>
-
+        android:title="Notas" />
     <item
-        android:id="@+id/agenda"
+        android:id="@+id/navigation_agenda"
         android:icon="@drawable/baseline_calendar_month_24"
-        android:title="Agenda"
-        app:showAsAction="ifRoom"
-        />
-
+        android:title="Agenda" />
     <item
-        android:id="@+id/chat"
+        android:id="@+id/navigation_chat"
         android:icon="@drawable/baseline_chat_24"
-        android:title="Chat"
-        app:showAsAction="ifRoom"/>
-
+        android:title="Chat" />
+    <item
+        android:id="@+id/navigation_logout"
+        android:icon="@drawable/baseline_logout_24"
+        android:title="Cerrar Sesión" />
 </menu>

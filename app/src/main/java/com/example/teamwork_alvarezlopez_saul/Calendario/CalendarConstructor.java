@@ -8,7 +8,6 @@ public class CalendarConstructor {
     private String fecha;
 
     public CalendarConstructor() {
-        // Constructor vacío requerido para Firebase
     }
 
     public CalendarConstructor(String id, String nombre, String asignatura, String descripcion, String fecha) {

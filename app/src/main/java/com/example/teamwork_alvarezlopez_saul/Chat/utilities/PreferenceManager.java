@@ -3,7 +3,6 @@ package com.example.teamwork_alvarezlopez_saul.Chat.utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes;
 
 public class PreferenceManager {
 

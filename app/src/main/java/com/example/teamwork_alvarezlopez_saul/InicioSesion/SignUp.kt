@@ -14,11 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager
 import com.example.teamwork_alvarezlopez_saul.Home.Home
-import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -27,6 +25,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+
+
+
 
 class SignUp : AppCompatActivity() {
     private lateinit var signUpButton: Button
@@ -44,7 +45,6 @@ class SignUp : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
-        // Inicialización de las variables
         signUpButton = findViewById(R.id.signUpbutton)
         emailEditText = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
@@ -57,7 +57,6 @@ class SignUp : AppCompatActivity() {
                 applicationContext
             )
 
-        // Configuración
         setup()
     }
 
@@ -200,7 +199,6 @@ class SignUp : AppCompatActivity() {
             if (task.isSuccessful) {
                 val document = task.result
                 if (document != null && document.exists()) {
-                    // El documento existe, actualiza el token
                     documentReference.update(Constantes.KEY_FCM_TOKEN, token)
                         .addOnSuccessListener {
                             Toast.makeText(applicationContext, "Token actualizado correctamente", Toast.LENGTH_SHORT).show()
@@ -209,7 +207,6 @@ class SignUp : AppCompatActivity() {
                             showAlert("Error", "Token no actualizado: ${exception.localizedMessage}")
                         }
                 } else {
-                    // El documento no existe, créalo y luego actualiza el token
                     val userData = mapOf(
                         Constantes.KEY_USERS_ID to userId,
                         Constantes.KEY_EMAIL to preferenceManager.getString(Constantes.KEY_EMAIL),

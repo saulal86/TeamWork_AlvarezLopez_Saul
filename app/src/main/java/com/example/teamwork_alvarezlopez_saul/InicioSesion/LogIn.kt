@@ -13,11 +13,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.teamwork_alvarezlopez_saul.CerrarSesion.ProviderType
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager
 import com.example.teamwork_alvarezlopez_saul.Home.Home
-import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -27,6 +25,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 
+enum class ProviderType{
+    BASIC,
+    GOOGLE
+}
 class LogIn : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var emailEditText: EditText
@@ -42,7 +44,6 @@ class LogIn : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log_in)
 
-        // Inicialización de las variables
         loginButton = findViewById(R.id.logInButton)
         emailEditText = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
@@ -54,7 +55,6 @@ class LogIn : AppCompatActivity() {
                 applicationContext
             )
 
-        // Configuración
         setup()
     }
 
