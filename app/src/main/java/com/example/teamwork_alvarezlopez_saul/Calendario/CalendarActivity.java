@@ -86,9 +86,6 @@ public class CalendarActivity extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Notes.class);
-                intent.putExtra("userId", userId); // Pasar userId de vuelta a Notes Activity
-                startActivity(intent);
                 finish();
             }
         });

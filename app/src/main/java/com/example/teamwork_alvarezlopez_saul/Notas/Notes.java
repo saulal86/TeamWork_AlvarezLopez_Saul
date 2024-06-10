@@ -1,6 +1,7 @@
 package com.example.teamwork_alvarezlopez_saul.Notas;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,9 +10,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teamwork_alvarezlopez_saul.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,6 +25,8 @@ import java.util.Map;
 public class Notes extends AppCompatActivity {
     EditText editor, nombrearchivo;
     Button botoncrear, botoneditar;
+
+    FloatingActionButton back, info;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -37,6 +42,8 @@ public class Notes extends AppCompatActivity {
         nombrearchivo = findViewById(R.id.nombrearchivo);
         botoncrear = findViewById(R.id.botoncrear);
         botoneditar = findViewById(R.id.botoneditar);
+        back = findViewById(R.id.buttonback);
+        info = findViewById(R.id.buttoninfo);
 
         botoncrear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,5 +95,34 @@ public class Notes extends AppCompatActivity {
                         .addOnFailureListener(e -> Toast.makeText(Notes.this, "Error al buscar la nota", Toast.LENGTH_SHORT).show());
             }
         });
+
+        back.setOnClickListener(v -> {
+            finish();
+        });
+
+        info.setOnClickListener(v -> {
+            showAlert("Información", "Pon un nombre a tu nota y creala, después dale " +
+                    "la informacion que quieras en el recuadro de escritura y guardala con el botón " +
+                    "indicado, luego puedes buscar esa misma nota poniendo su nombre en el campo " +
+                    "superior y usando el boton de 'Buscar nota' pudiendo asi editarla.");
+        });
     }
+
+    public void showAlert(String title, String message) {
+        if (!isFinishing() && !isDestroyed()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(title);
+            alertDialogBuilder.setMessage(message);
+            alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
+    }
+
 }
