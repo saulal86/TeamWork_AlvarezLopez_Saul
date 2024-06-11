@@ -1,5 +1,7 @@
 package com.example.teamwork_alvarezlopez_saul.Chat.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +14,7 @@ import com.example.teamwork_alvarezlopez_saul.Chat.models.User;
 import com.example.teamwork_alvarezlopez_saul.Chat.listeners.UserListener;
 import com.example.teamwork_alvarezlopez_saul.Chat.adapters.UsersAdapter;
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityUsersBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -21,6 +24,8 @@ import java.util.List;
 public class UsersActivity extends BaseActivity implements UserListener {
 
     private ActivityUsersBinding binding;
+
+    private FloatingActionButton back, info;
     private PreferenceManager preferenceManager;
 
 
@@ -32,6 +37,18 @@ public class UsersActivity extends BaseActivity implements UserListener {
 
         binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.usersRecyclerView.setHasFixedSize(true);
+
+        back = binding.back;
+
+        back.setOnClickListener(v -> {
+            finish();
+        });
+
+        info = binding.info;
+
+        info.setOnClickListener(v -> {
+            showAlert("Info", "Toque sobre un usuario para iniciar una conversación con este.");
+        });
 
         preferenceManager = new PreferenceManager(getApplicationContext());
         getUsers();
@@ -90,6 +107,23 @@ public class UsersActivity extends BaseActivity implements UserListener {
         intent.putExtra(Constantes.KEY_USER, user);
         startActivity(intent);
         finish();
+    }
+
+    public void showAlert(String title, String message) {
+        if (!isFinishing() && !isDestroyed()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(title);
+            alertDialogBuilder.setMessage(message);
+            alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 
 }

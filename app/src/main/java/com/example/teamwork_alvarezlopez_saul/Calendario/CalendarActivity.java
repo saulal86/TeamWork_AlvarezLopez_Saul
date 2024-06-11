@@ -1,6 +1,7 @@
 package com.example.teamwork_alvarezlopez_saul.Calendario;
 
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -89,6 +90,18 @@ public class CalendarActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        FloatingActionButton info = findViewById(R.id.info);
+
+        info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAlert("Info", "Dele al botón '+' para añadir una " +
+                        "tarea/examen/proyecto a tu agenda, con este ya creado podrá editarlo " +
+                        "tocando sobre la tarea y podrá eliminarlo manteniendo pulsado sobre él.");
+            }
+        });
+
 
         loadProjectsFromFirebase();
     }
@@ -266,5 +279,22 @@ public class CalendarActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    public void showAlert(String title, String message) {
+        if (!isFinishing() && !isDestroyed()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(title);
+            alertDialogBuilder.setMessage(message);
+            alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 }

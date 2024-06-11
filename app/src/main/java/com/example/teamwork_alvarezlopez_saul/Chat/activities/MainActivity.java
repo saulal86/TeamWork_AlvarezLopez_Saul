@@ -1,8 +1,11 @@
 package com.example.teamwork_alvarezlopez_saul.Chat.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.teamwork_alvarezlopez_saul.Chat.models.ChatMessage;
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes;
@@ -25,7 +28,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
 
     private ActivityMainChatBinding binding;
     private PreferenceManager preferenceManager;
-    FloatingActionButton botoncontactos;
+    FloatingActionButton botoncontactos, back, info;
     private List<ChatMessage> conversations;
     private RecentConversationsAdapter conversationsAdapter;
     private FirebaseFirestore database;
@@ -43,6 +46,21 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         botoncontactos.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), UsersActivity.class);
             startActivity(intent);
+        });
+
+        back = binding.back;
+
+        back.setOnClickListener(v -> {
+            finish();
+        });
+
+        info = binding.info;
+
+        info.setOnClickListener(v -> {
+            showAlert("Info", "Aquí te saldrán las conversaciones recientes con el " +
+                    "último mensaje enviado o recibido, tocando sobre el nombre del usuario con " +
+                    "el cual tienes esa conversacion reciente podras acceder a su conversación." +
+                    "\n" + "Toque sobre el boton '+' para iniciar una nueva conversación con los usuarios de la app.");
         });
 
         init();
@@ -112,5 +130,22 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constantes.KEY_USER, user);
         startActivity(intent);
+    }
+
+    public void showAlert(String title, String message) {
+        if (!isFinishing() && !isDestroyed()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(title);
+            alertDialogBuilder.setMessage(message);
+            alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 }
