@@ -34,17 +34,17 @@ enum class ProviderType {
 }
 
 class SignUp : AppCompatActivity() {
-    private lateinit var signUpButton: Button
-    private lateinit var emailEditText: EditText
+    private lateinit var botonregistrar: Button
+    private lateinit var editTextemail: EditText
     private lateinit var contraseñaEditText: EditText
     private lateinit var confirmarcontraseñaEditText: EditText
-    private lateinit var googleButton: ImageButton
+    private lateinit var botongoogle: ImageButton
     private lateinit var SignUpLayout: ConstraintLayout
     private lateinit var textoiniciarsesion: TextView
-    private lateinit var togglePasswordVisibilityButton: ImageButton
-    private lateinit var toggleConfirmPasswordVisibilityButton: ImageButton
-    private var isPasswordVisible = false
-    private var isConfirmPasswordVisible = false
+    private lateinit var ojocontraseña: ImageButton
+    private lateinit var ojoconfirmarcontraseña: ImageButton
+    private var contravisible = false
+    private var contraconfirvisible = false
     private val GOOGLE_SIGN_IN = 100
 
     private lateinit var preferenceManager: PreferenceManager
@@ -54,38 +54,38 @@ class SignUp : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
 
         // Inicialización de las variables
-        signUpButton = findViewById(R.id.signUpbutton)
-        emailEditText = findViewById(R.id.emailEditText)
+        botonregistrar = findViewById(R.id.signUpbutton)
+        editTextemail = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
         SignUpLayout = findViewById(R.id.SignUpLayout)
         confirmarcontraseñaEditText = findViewById(R.id.confirmarcontraseñaEditText)
         textoiniciarsesion = findViewById(R.id.textoiniciarsesion)
-        googleButton = findViewById(R.id.googlebutton)
-        togglePasswordVisibilityButton = findViewById(R.id.togglePasswordVisibilityButton)
-        toggleConfirmPasswordVisibilityButton = findViewById(R.id.toggleConfirmPasswordVisibilityButton)
+        botongoogle = findViewById(R.id.googlebutton)
+        ojocontraseña = findViewById(R.id.togglePasswordVisibilityButton)
+        ojoconfirmarcontraseña = findViewById(R.id.toggleConfirmPasswordVisibilityButton)
         preferenceManager = PreferenceManager(applicationContext)
 
-        togglePasswordVisibilityButton.setOnClickListener {
-            if (isPasswordVisible) {
+        ojocontraseña.setOnClickListener {
+            if (contravisible) {
                 contraseñaEditText.transformationMethod = PasswordTransformationMethod.getInstance()
-                togglePasswordVisibilityButton.setImageResource(R.drawable.ic_eye)
+                ojocontraseña.setImageResource(R.drawable.ic_eye)
             } else {
                 contraseñaEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
-                togglePasswordVisibilityButton.setImageResource(R.drawable.ic_eye_off)
+                ojocontraseña.setImageResource(R.drawable.ic_eye_off)
             }
-            isPasswordVisible = !isPasswordVisible
+            contravisible = !contravisible
             contraseñaEditText.setSelection(contraseñaEditText.text.length) // Para mover el cursor al final del texto
         }
 
-        toggleConfirmPasswordVisibilityButton.setOnClickListener {
-            if (isConfirmPasswordVisible) {
+        ojoconfirmarcontraseña.setOnClickListener {
+            if (contraconfirvisible) {
                 confirmarcontraseñaEditText.transformationMethod = PasswordTransformationMethod.getInstance()
-                toggleConfirmPasswordVisibilityButton.setImageResource(R.drawable.ic_eye)
+                ojoconfirmarcontraseña.setImageResource(R.drawable.ic_eye)
             } else {
                 confirmarcontraseñaEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
-                toggleConfirmPasswordVisibilityButton.setImageResource(R.drawable.ic_eye_off)
+                ojoconfirmarcontraseña.setImageResource(R.drawable.ic_eye_off)
             }
-            isConfirmPasswordVisible = !isConfirmPasswordVisible
+            contraconfirvisible = !contraconfirvisible
             confirmarcontraseñaEditText.setSelection(confirmarcontraseñaEditText.text.length) // Para mover el cursor al final del texto
         }
 
@@ -98,7 +98,7 @@ class SignUp : AppCompatActivity() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             SignUpLayout.visibility = View.INVISIBLE
-            showHome(currentUser.email ?: "", currentUser.uid, ProviderType.BASIC)
+            acceder(currentUser.email ?: "", currentUser.uid, ProviderType.BASIC)
         } else {
             SignUpLayout.visibility = View.VISIBLE
             FirebaseAuth.getInstance().signOut()
@@ -108,12 +108,12 @@ class SignUp : AppCompatActivity() {
     private fun setup() {
         title = "Autenticación"
 
-        signUpButton.setOnClickListener {
-            val email = emailEditText.text.toString()
+        botonregistrar.setOnClickListener {
+            val email = editTextemail.text.toString()
             val password = contraseñaEditText.text.toString()
             val confirmPassword = confirmarcontraseñaEditText.text.toString()
 
-            if (validateEmail(email) && validatePassword(password)) {
+            if (validaremail(email) && validarcontraseña(password)) {
                 if (password == confirmPassword) {
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
@@ -123,9 +123,9 @@ class SignUp : AppCompatActivity() {
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
                                 preferenceManager.putString(Constantes.KEY_EMAIL, email)
                                 Log.d("SignUp", "User ID saved: $userId")
-                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
-                                showHomeOrVerifyEmail(email, userId, ProviderType.BASIC)
-                                getToken()
+                                guardaUserFirebase(userId, email) // Guarda el userId y el email en Firestore
+                                correoVerificacion(email, userId, ProviderType.BASIC)
+                                cogeToken()
                             } else {
                                 showAlert("Error", "Se ha producido un error autenticando al usuario")
                             }
@@ -138,7 +138,7 @@ class SignUp : AppCompatActivity() {
             }
         }
 
-        googleButton.setOnClickListener {
+        botongoogle.setOnClickListener {
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getGoogleClientId(this)).requestEmail().build()
 
@@ -174,9 +174,9 @@ class SignUp : AppCompatActivity() {
                                 val email = account.email ?: ""
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
-                                saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
-                                showHome(email, userId, ProviderType.GOOGLE)
-                                getToken()
+                                guardaUserFirebase(userId, email) // Guarda el userId y el email en Firestore
+                                acceder(email, userId, ProviderType.GOOGLE)
+                                cogeToken()
                             } else {
                                 val error = it.exception?.message ?: "Error desconocido"
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")
@@ -204,21 +204,21 @@ class SignUp : AppCompatActivity() {
         return ""
     }
 
-    private fun validateEmail(email: String): Boolean {
+    private fun validaremail(email: String): Boolean {
         val emailPattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.(com|es)$")
         val isValid = emailPattern.matches(email)
         Log.d("SignUp", "Email validation for $email: $isValid")
         return isValid
     }
 
-    private fun validatePassword(password: String): Boolean {
+    private fun validarcontraseña(password: String): Boolean {
         val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,}$")
         val isValid = passwordPattern.matches(password)
         Log.d("SignUp", "Password validation for $password: $isValid")
         return isValid
     }
 
-    private fun saveUserToFirestore(userId: String, email: String) {
+    private fun guardaUserFirebase(userId: String, email: String) {
         val database = FirebaseFirestore.getInstance()
         val data: HashMap<String, Any> = HashMap()
         data[Constantes.KEY_EMAIL] = email
@@ -236,28 +236,28 @@ class SignUp : AppCompatActivity() {
             }
     }
 
-    private fun showHomeOrVerifyEmail(email: String, userId: String, provider: ProviderType) {
+    private fun correoVerificacion(email: String, userId: String, provider: ProviderType) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (provider == ProviderType.GOOGLE || (currentUser != null && currentUser.isEmailVerified)) {
-            showHome(email, userId, provider)
+            acceder(email, userId, provider)
         } else {
             currentUser?.sendEmailVerification()
-            showEmailNotVerifiedAlert(email, userId, provider)
+            alertanoverificado(email, userId, provider)
         }
     }
 
-    private fun showEmailNotVerifiedAlert(email: String, userId: String, provider: ProviderType) {
+    private fun alertanoverificado(email: String, userId: String, provider: ProviderType) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Correo electrónico no verificado")
         builder.setMessage("Recuerda verificar tu correo electrónico para mayor seguridad.")
         builder.setPositiveButton("Aceptar") { _, _ ->
-            showHome(email, userId, provider)
+            acceder(email, userId, provider)
         }
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
 
-    private fun showHome(email: String, userId: String, provider: ProviderType) {
+    private fun acceder(email: String, userId: String, provider: ProviderType) {
         val homeIntent = Intent(this, Home::class.java).apply {
             putExtra("email", email)
             putExtra("userId", userId)
@@ -276,14 +276,14 @@ class SignUp : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun getToken() {
+    private fun cogeToken() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
                     val userId = preferenceManager.getString(Constantes.KEY_USERS_ID)
                     if (userId != null) {
-                        updateToken(userId, token)
+                        actualizaToken(userId, token)
                     } else {
                         showAlert("Error", "User ID is null")
                     }
@@ -293,7 +293,7 @@ class SignUp : AppCompatActivity() {
             }
     }
 
-    private fun updateToken(userId: String, token: String) {
+    private fun actualizaToken(userId: String, token: String) {
         val database = FirebaseFirestore.getInstance()
         val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
 

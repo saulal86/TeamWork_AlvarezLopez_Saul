@@ -28,7 +28,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
 
     private ActivityMainChatBinding binding;
     private PreferenceManager preferenceManager;
-    FloatingActionButton botoncontactos, back, info;
+    FloatingActionButton botoncontactos, atras, info;
     private List<ChatMessage> conversations;
     private RecentConversationsAdapter conversationsAdapter;
     private FirebaseFirestore database;
@@ -48,32 +48,32 @@ public class MainActivity extends BaseActivity implements ConversionListener {
             startActivity(intent);
         });
 
-        back = binding.back;
+        atras = binding.back;
 
-        back.setOnClickListener(v -> {
+        atras.setOnClickListener(v -> {
             finish();
         });
 
         info = binding.info;
 
         info.setOnClickListener(v -> {
-            showAlert("Info", "Aquí te saldrán las conversaciones recientes con el " +
+            muestraalerta("Info", "Aquí te saldrán las conversaciones recientes con el " +
                     "último mensaje enviado o recibido, tocando sobre el nombre del usuario con " +
                     "el cual tienes esa conversacion reciente podras acceder a su conversación." +
                     "\n" + "Toque sobre el boton '+' para iniciar una nueva conversación con los usuarios de la app.");
         });
 
-        init();
-        listenConversations();
+        iniciar();
+        escuchaconvers();
     }
-    private void init() {
+    private void iniciar() {
         conversations = new ArrayList<>();
         conversationsAdapter = new RecentConversationsAdapter(conversations, this);
         binding.conversationsRecyclerView.setAdapter(conversationsAdapter);
         database = FirebaseFirestore.getInstance();
     }
 
-    private void listenConversations(){
+    private void escuchaconvers(){
         database.collection(Constantes.KEY_COLLECTION_CONVERSATIONS)
                 .whereEqualTo(Constantes.KEY_SENDER_ID, preferenceManager.getString(Constantes.KEY_USERS_ID))
                 .addSnapshotListener(eventListener);
@@ -92,8 +92,8 @@ public class MainActivity extends BaseActivity implements ConversionListener {
                         String senderId = documentChange.getDocument().getString(Constantes.KEY_SENDER_ID);
                         String receiverId = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_ID);
                         ChatMessage chatMessage = new ChatMessage();
-                        chatMessage.senderId = senderId;
-                        chatMessage.receiverId = receiverId;
+                        chatMessage.idenvia = senderId;
+                        chatMessage.idrecibe = receiverId;
                         if (preferenceManager.getString(Constantes.KEY_USERS_ID).equals(senderId)) {
                             chatMessage.conversionName = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_NAME);
                             chatMessage.conversionId = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_ID);
@@ -101,23 +101,23 @@ public class MainActivity extends BaseActivity implements ConversionListener {
                             chatMessage.conversionName = documentChange.getDocument().getString(Constantes.KEY_SENDER_NAME);
                             chatMessage.conversionId = documentChange.getDocument().getString(Constantes.KEY_SENDER_ID);
                         }
-                        chatMessage.message = documentChange.getDocument().getString(Constantes.KEY_LAST_MESSAGE);
-                        chatMessage.dateObject = documentChange.getDocument().getDate(Constantes.KEY_TIMESTAMP);
+                        chatMessage.mensaje = documentChange.getDocument().getString(Constantes.KEY_ULTIMO_MENSAJE);
+                        chatMessage.fechaObject = documentChange.getDocument().getDate(Constantes.KEY_TIEMPO);
                         conversations.add(chatMessage);
                     }else if(documentChange.getType() == DocumentChange.Type.MODIFIED){
                         for (int i = 0; i < conversations.size(); i++){
                             String senderId = documentChange.getDocument().getString(Constantes. KEY_SENDER_ID);
                             String receiverId = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_ID);
-                            if (conversations.get(i).senderId.equals(senderId) && conversations.get(i).receiverId.equals(receiverId)) {
-                                conversations.get(i).message = documentChange.getDocument().getString(Constantes.KEY_LAST_MESSAGE);
-                                conversations.get(i).dateObject = documentChange.getDocument().getDate(Constantes.KEY_TIMESTAMP);
+                            if (conversations.get(i).idenvia.equals(senderId) && conversations.get(i).idrecibe.equals(receiverId)) {
+                                conversations.get(i).mensaje = documentChange.getDocument().getString(Constantes.KEY_ULTIMO_MENSAJE);
+                                conversations.get(i).fechaObject = documentChange.getDocument().getDate(Constantes.KEY_TIEMPO);
                                 break;
                             }
                         }
                     }
 
                 }
-                Collections.sort(conversations,(obj1, obj2) ->obj2.dateObject.compareTo(obj1.dateObject));
+                Collections.sort(conversations,(obj1, obj2) ->obj2.fechaObject.compareTo(obj1.fechaObject));
                 conversationsAdapter.notifyDataSetChanged();
                 binding. conversationsRecyclerView.smoothScrollToPosition(0);
                 binding.conversationsRecyclerView.setVisibility(View.VISIBLE);
@@ -132,7 +132,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         startActivity(intent);
     }
 
-    public void showAlert(String title, String message) {
+    public void muestraalerta(String title, String message) {
         if (!isFinishing() && !isDestroyed()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setTitle(title);

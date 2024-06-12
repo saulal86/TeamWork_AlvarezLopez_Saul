@@ -1,6 +1,5 @@
 package com.example.teamwork_alvarezlopez_saul.Notas;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -8,7 +7,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,9 +24,9 @@ public class Notes extends AppCompatActivity {
     EditText editor, nombrearchivo;
     Button botoncrear, botoneditar;
 
-    FloatingActionButton back, info;
+    FloatingActionButton atras, info;
     private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth auth;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,13 +34,13 @@ public class Notes extends AppCompatActivity {
         setContentView(R.layout.activity_notes);
 
         db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         editor = findViewById(R.id.editor);
         nombrearchivo = findViewById(R.id.nombrearchivo);
         botoncrear = findViewById(R.id.botoncrear);
         botoneditar = findViewById(R.id.botoneditar);
-        back = findViewById(R.id.buttonback);
+        atras = findViewById(R.id.buttonback);
         info = findViewById(R.id.buttoninfo);
 
         botoncrear.setOnClickListener(new View.OnClickListener() {
@@ -50,7 +48,7 @@ public class Notes extends AppCompatActivity {
             public void onClick(View v) {
                 String editortexto = editor.getText().toString();
                 String nombre = nombrearchivo.getText().toString();
-                String userId = mAuth.getCurrentUser().getUid();
+                String userId = auth.getCurrentUser().getUid();
                 Map<String, Object> note = new HashMap<>();
                 note.put("title", nombre);
                 note.put("content", editortexto);
@@ -71,7 +69,7 @@ public class Notes extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String nombre = nombrearchivo.getText().toString();
-                String userId = mAuth.getCurrentUser().getUid();
+                String userId = auth.getCurrentUser().getUid();
 
                 db.collection("notes")
                         .whereEqualTo("title", nombre)
@@ -96,7 +94,7 @@ public class Notes extends AppCompatActivity {
             }
         });
 
-        back.setOnClickListener(v -> {
+        atras.setOnClickListener(v -> {
             finish();
         });
 

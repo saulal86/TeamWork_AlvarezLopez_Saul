@@ -27,11 +27,11 @@ import com.google.firebase.messaging.FirebaseMessaging
 class LogIn : AppCompatActivity() {
 
     // Declaración de variables
-    private lateinit var loginButton: Button
+    private lateinit var botonlogin: Button
     private lateinit var emailEditText: EditText
     private lateinit var contraseñaEditText: EditText
-    private lateinit var googleButton: ImageButton
-    private lateinit var eyeButton: ImageButton
+    private lateinit var botongoogle: ImageButton
+    private lateinit var botonojo: ImageButton
     private lateinit var loginLayout: ConstraintLayout
     private lateinit var textoregistrarse: TextView
     private val GOOGLE_SIGN_IN = 100
@@ -43,11 +43,11 @@ class LogIn : AppCompatActivity() {
         setContentView(R.layout.activity_log_in)
 
         // Inicialización de las variables
-        loginButton = findViewById(R.id.logInButton)
+        botonlogin = findViewById(R.id.logInButton)
         emailEditText = findViewById(R.id.emailEditText)
         contraseñaEditText = findViewById(R.id.contraseñaEditText)
-        googleButton = findViewById(R.id.googlebutton)
-        eyeButton = findViewById(R.id.eyeButton)
+        botongoogle = findViewById(R.id.googlebutton)
+        botonojo = findViewById(R.id.eyeButton)
         loginLayout = findViewById(R.id.LogInLayout)
         textoregistrarse = findViewById(R.id.textoregistrarse)
         preferenceManager = PreferenceManager(applicationContext)
@@ -56,13 +56,13 @@ class LogIn : AppCompatActivity() {
         setup()
 
         // Toggle password visibility
-        eyeButton.setOnClickListener {
+        botonojo.setOnClickListener {
             if (contraseñaEditText.transformationMethod is PasswordTransformationMethod) {
                 contraseñaEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
-                eyeButton.setImageResource(R.drawable.ic_eye_off)
+                botonojo.setImageResource(R.drawable.ic_eye_off)
             } else {
                 contraseñaEditText.transformationMethod = PasswordTransformationMethod.getInstance()
-                eyeButton.setImageResource(R.drawable.ic_eye)
+                botonojo.setImageResource(R.drawable.ic_eye)
             }
             contraseñaEditText.setSelection(contraseñaEditText.text.length)
         }
@@ -73,7 +73,7 @@ class LogIn : AppCompatActivity() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             loginLayout.visibility = View.INVISIBLE
-            showHome(currentUser.email ?: "", currentUser.uid, ProviderType.BASIC)
+            acceder(currentUser.email ?: "", currentUser.uid, ProviderType.BASIC)
         } else {
             loginLayout.visibility = View.VISIBLE
             FirebaseAuth.getInstance().signOut()
@@ -83,7 +83,7 @@ class LogIn : AppCompatActivity() {
     private fun setup() {
         title = "Autenticación"
 
-        loginButton.setOnClickListener {
+        botonlogin.setOnClickListener {
             val email = emailEditText.text.toString()
             val password = contraseñaEditText.text.toString()
 
@@ -95,8 +95,8 @@ class LogIn : AppCompatActivity() {
                             val userId = user?.uid ?: ""
                             preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
                             preferenceManager.putString(Constantes.KEY_EMAIL, email)
-                            showHome(email, userId, ProviderType.BASIC)
-                            getToken()
+                            acceder(email, userId, ProviderType.BASIC)
+                            cogeToken()
                         } else {
                             showAlert("Error", "Se ha producido un error autenticando al usuario")
                         }
@@ -107,7 +107,7 @@ class LogIn : AppCompatActivity() {
         }
 
         // Listener para el botón de Google
-        googleButton.setOnClickListener {
+        botongoogle.setOnClickListener {
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getGoogleClientId(this)).requestEmail().build()
 
@@ -141,30 +141,14 @@ class LogIn : AppCompatActivity() {
         return isValid
     }
 
-    private fun saveUserEmailToFirestore(userId: String) {
-        val database = FirebaseFirestore.getInstance()
-        val data: HashMap<String, Any> = HashMap()
-
-        val documentReference = database.collection(Constantes.KEY_COLLECTION_USERS).document(userId)
-
-        documentReference.set(data)
-            .addOnSuccessListener {
-                Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
-                getToken()
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun getToken() {
+    private fun cogeToken() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
                     val userId = preferenceManager.getString(Constantes.KEY_USERS_ID)
                     if (userId != null) {
-                        updateToken(userId, token)
+                        actualizaToken(userId, token)
                     } else {
                         showAlert("Error", "User ID is null")
                     }
@@ -174,7 +158,7 @@ class LogIn : AppCompatActivity() {
             }
     }
 
-    private fun updateToken(userId: String, token: String) {
+    private fun actualizaToken(userId: String, token: String) {
         val documentReference = FirebaseFirestore.getInstance().collection(Constantes.KEY_COLLECTION_USERS).document(userId)
         val data: HashMap<String, Any> = HashMap()
         data[Constantes.KEY_FCM_TOKEN] = token
@@ -200,7 +184,7 @@ class LogIn : AppCompatActivity() {
         }
     }
 
-    private fun showHome(email: String, userId: String, provider: ProviderType) {
+    private fun acceder(email: String, userId: String, provider: ProviderType) {
         val homeIntent = Intent(this, Home::class.java).apply {
             putExtra("email", email)
             putExtra("userId", userId)
@@ -243,8 +227,8 @@ class LogIn : AppCompatActivity() {
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
                                 preferenceManager.putString(Constantes.KEY_EMAIL, email)
-                                showHome(email, userId, ProviderType.GOOGLE)
-                                getToken()
+                                acceder(email, userId, ProviderType.GOOGLE)
+                                cogeToken()
                             } else {
                                 val error = it.exception?.message ?: "Error desconocido"
                                 showAlert("Error", "Ha ocurrido un error al iniciar sesión: $error")

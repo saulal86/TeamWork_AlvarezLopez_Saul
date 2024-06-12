@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.teamwork_alvarezlopez_saul.Calendario.CalendarActivity;
+import com.example.teamwork_alvarezlopez_saul.Agenda.AgendaActivity;
 import com.example.teamwork_alvarezlopez_saul.Chat.activities.MainActivity;
 import com.example.teamwork_alvarezlopez_saul.Notas.Notes;
 import com.example.teamwork_alvarezlopez_saul.R;
@@ -18,8 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class Home extends AppCompatActivity {
 
     private String userId;
-    private MenuItem previousMenuItem;
-    private TextView itemNameTextView;
+    private MenuItem itemprevio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,35 +28,29 @@ public class Home extends AppCompatActivity {
         userId = getIntent().getStringExtra("userId");
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        itemNameTextView = findViewById(R.id.item_name);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item == previousMenuItem && itemNameTextView.getVisibility() == TextView.VISIBLE) {
-                    executeMenuItemAction(item.getItemId());
-                    itemNameTextView.setVisibility(TextView.GONE);
-                    previousMenuItem = null;  // Reset previous item
+                if (item == itemprevio) {
+                    accionmenu(item.getItemId());
+                    itemprevio = null;  // Reset previous item
                 } else {
-                    showMenuItemName(item);
-                    previousMenuItem = item;
+                    itemprevio = item;
                 }
                 return true;
             }
         });
     }
 
-    private void showMenuItemName(MenuItem item) {
-        itemNameTextView.setText(item.getTitle());
-        itemNameTextView.setVisibility(TextView.VISIBLE);
-    }
 
-    private void executeMenuItemAction(int itemId) {
+
+    private void accionmenu(int itemId) {
         if (itemId == R.id.navigation_notas) {
             Intent intent = new Intent(getApplicationContext(), Notes.class);
             startActivity(intent);
         } else if (itemId == R.id.navigation_agenda) {
-            Intent intent2 = new Intent(getApplicationContext(), CalendarActivity.class);
+            Intent intent2 = new Intent(getApplicationContext(), AgendaActivity.class);
             intent2.putExtra("userId", userId);
             startActivity(intent2);
         } else if (itemId == R.id.navigation_chat) {

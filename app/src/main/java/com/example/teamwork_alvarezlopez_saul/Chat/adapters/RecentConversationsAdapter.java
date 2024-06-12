@@ -35,7 +35,7 @@ public class RecentConversationsAdapter extends RecyclerView.Adapter<RecentConve
 
     @Override
     public void onBindViewHolder(@NonNull ConversionViewHolder holder, int position) {
-        holder.setData(chatMessages.get(position));
+        holder.datos(chatMessages.get(position));
     }
 
     @Override
@@ -51,9 +51,9 @@ public class RecentConversationsAdapter extends RecyclerView.Adapter<RecentConve
             binding = itemContainerRecentConversionBinding;
         }
 
-            void setData(ChatMessage chatMessage){
+            void datos(ChatMessage chatMessage){
                 binding.textName.setText(chatMessage.conversionName);
-                binding.textRecentMessage.setText(chatMessage.message);
+                binding.textRecentMessage.setText(chatMessage.mensaje);
                 binding.getRoot().setOnClickListener(v -> {
                     User user = new User();
                     user.id = chatMessage.conversionId;

@@ -39,7 +39,7 @@ public class ChatActivity extends BaseActivity {
     private String conversionId = null;
     private boolean isReceiverAvailable = false;
 
-    private FloatingActionButton imageBack;
+    private FloatingActionButton atras;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +50,8 @@ public class ChatActivity extends BaseActivity {
         init();
         setListeners();
         listenMessages();
-        imageBack = findViewById(R.id.imageBack);
-        imageBack.setOnClickListener(new View.OnClickListener() {
+        atras = findViewById(R.id.imageBack);
+        atras.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -76,8 +76,8 @@ public class ChatActivity extends BaseActivity {
             HashMap<String, Object> message = new HashMap<>();
             message.put(Constantes.KEY_SENDER_ID, preferenceManager.getString(Constantes.KEY_USERS_ID));
             message.put(Constantes.KEY_RECEIVER_ID, receiverUser.id);
-            message.put(Constantes.KEY_MESSAGE, binding.inputMessage.getText().toString());
-            message.put(Constantes.KEY_TIMESTAMP, new Date());
+            message.put(Constantes.KEY_MENSAJE, binding.inputMessage.getText().toString());
+            message.put(Constantes.KEY_TIEMPO, new Date());
             database.collection(Constantes.KEY_COLLECTION_CHAT).add(message);
             if (conversionId != null) {
                 updateConversion(binding.inputMessage.getText().toString());
@@ -87,8 +87,8 @@ public class ChatActivity extends BaseActivity {
                 conversion.put(Constantes.KEY_SENDER_NAME, preferenceManager.getString(Constantes.KEY_EMAIL));
                 conversion.put(Constantes.KEY_RECEIVER_ID,receiverUser.id);
                 conversion.put(Constantes.KEY_RECEIVER_NAME,receiverUser.email);
-                conversion.put(Constantes.KEY_LAST_MESSAGE,binding.inputMessage.getText().toString());
-                conversion.put(Constantes.KEY_TIMESTAMP, new Date());
+                conversion.put(Constantes.KEY_ULTIMO_MENSAJE,binding.inputMessage.getText().toString());
+                conversion.put(Constantes.KEY_TIEMPO, new Date());
                 addConversion(conversion);
             }
             binding.inputMessage.setText(null);
@@ -144,15 +144,15 @@ public class ChatActivity extends BaseActivity {
             for (DocumentChange documentChange : value.getDocumentChanges()){
                 if(documentChange.getType() == DocumentChange.Type.ADDED) {
                     ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.senderId = documentChange.getDocument().getString(Constantes.KEY_SENDER_ID);
-                    chatMessage.receiverId = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_ID);
-                    chatMessage.message = documentChange.getDocument().getString(Constantes.KEY_MESSAGE);
-                    chatMessage.dateTime = getReadableDateTime(documentChange.getDocument().getDate(Constantes.KEY_TIMESTAMP));
-                    chatMessage.dateObject = documentChange.getDocument().getDate(Constantes.KEY_TIMESTAMP);
+                    chatMessage.idenvia = documentChange.getDocument().getString(Constantes.KEY_SENDER_ID);
+                    chatMessage.idrecibe = documentChange.getDocument().getString(Constantes.KEY_RECEIVER_ID);
+                    chatMessage.mensaje = documentChange.getDocument().getString(Constantes.KEY_MENSAJE);
+                    chatMessage.tiempo = getReadableDateTime(documentChange.getDocument().getDate(Constantes.KEY_TIEMPO));
+                    chatMessage.fechaObject = documentChange.getDocument().getDate(Constantes.KEY_TIEMPO);
                     chatMessages.add(chatMessage);
                 }
             }
-            chatMessages.sort((obj1, obj2) -> obj1.dateObject.compareTo(obj2.dateObject));
+            chatMessages.sort((obj1, obj2) -> obj1.fechaObject.compareTo(obj2.fechaObject));
             if (count == 0){
                 chatAdapter.notifyDataSetChanged();
             } else {
@@ -189,8 +189,8 @@ public class ChatActivity extends BaseActivity {
         DocumentReference documentReference =
                 database.collection(Constantes.KEY_COLLECTION_CONVERSATIONS).document(conversionId);
         documentReference.update(
-                Constantes.KEY_LAST_MESSAGE, message,
-                Constantes.KEY_TIMESTAMP, new Date()
+                Constantes.KEY_ULTIMO_MENSAJE, message,
+                Constantes.KEY_TIEMPO, new Date()
         );
     }
 

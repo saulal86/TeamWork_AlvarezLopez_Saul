@@ -1,8 +1,7 @@
-package com.example.teamwork_alvarezlopez_saul.Calendario;
+package com.example.teamwork_alvarezlopez_saul.Agenda;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.teamwork_alvarezlopez_saul.Notas.Notes;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,17 +32,17 @@ import java.util.Collections;
 
 import com.example.teamwork_alvarezlopez_saul.R;
 
-public class CalendarActivity extends AppCompatActivity {
+public class AgendaActivity extends AppCompatActivity {
 
-    private ArrayList<CalendarConstructor> projectList;
-    private CalendarAdapter projectAdapter;
+    private ArrayList<AgendaConstructor> projectList;
+    private AgendaAdapter agendaAdapter;
     private DatabaseReference databaseReference;
     private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calendar);
+        setContentView(R.layout.activity_agenda);
 
         userId = getIntent().getStringExtra("userId");
         if (userId == null) {
@@ -54,23 +52,23 @@ public class CalendarActivity extends AppCompatActivity {
         }
 
         projectList = new ArrayList<>();
-        projectAdapter = new CalendarAdapter(this, projectList);
+        agendaAdapter = new AgendaAdapter(this, projectList);
         databaseReference = FirebaseDatabase.getInstance().getReference("usuarios").child(userId).child("proyectos");
 
         ListView listViewProjects = findViewById(R.id.listViewProjects);
-        listViewProjects.setAdapter(projectAdapter);
+        listViewProjects.setAdapter(agendaAdapter);
 
         listViewProjects.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showEditProjectDialog(position);
+                editartarea(position);
             }
         });
 
         listViewProjects.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                deleteProject(position);
+                borratarea(position);
                 return true;
             }
         });
@@ -79,7 +77,7 @@ public class CalendarActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showAddProjectDialog();
+                añadirtarea();
             }
         });
 
@@ -96,28 +94,28 @@ public class CalendarActivity extends AppCompatActivity {
         info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlert("Info", "Dele al botón '+' para añadir una " +
+                muestraalerta("Info", "Dele al botón '+' para añadir una " +
                         "tarea/examen/proyecto a tu agenda, con este ya creado podrá editarlo " +
                         "tocando sobre la tarea y podrá eliminarlo manteniendo pulsado sobre él.");
             }
         });
 
 
-        loadProjectsFromFirebase();
+        cargatareas();
     }
 
-    private void loadProjectsFromFirebase() {
+    private void cargatareas() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 projectList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    CalendarConstructor proyecto = snapshot.getValue(CalendarConstructor.class);
+                    AgendaConstructor proyecto = snapshot.getValue(AgendaConstructor.class);
                     proyecto.setId(snapshot.getKey());
                     projectList.add(proyecto);
                 }
                 Collections.reverse(projectList);
-                projectAdapter.notifyDataSetChanged();
+                agendaAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -127,26 +125,26 @@ public class CalendarActivity extends AppCompatActivity {
         });
     }
 
-    private void deleteProject(int position) {
-        CalendarConstructor projectToDelete = projectList.get(position);
+    private void borratarea(int position) {
+        AgendaConstructor projectToDelete = projectList.get(position);
         String projectId = projectToDelete.getId();
 
         databaseReference.child(projectId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(CalendarActivity.this, "Proyecto eliminado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AgendaActivity.this, "Proyecto eliminado", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(CalendarActivity.this, "Error al eliminar el proyecto", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AgendaActivity.this, "Error al eliminar el proyecto", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         projectList.remove(position);
-        projectAdapter.notifyDataSetChanged();
+        agendaAdapter.notifyDataSetChanged();
     }
 
-    private void showAddProjectDialog() {
+    private void añadirtarea() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_addwork, null);
@@ -160,7 +158,7 @@ public class CalendarActivity extends AppCompatActivity {
         editTextDueDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDatePickerDialog(editTextDueDate);
+                dialogfecha(editTextDueDate);
             }
         });
 
@@ -182,19 +180,19 @@ public class CalendarActivity extends AppCompatActivity {
 
                 if (!projectName.isEmpty() && !subject.isEmpty() && !description.isEmpty() && !dueDate.isEmpty()) {
                     String projectId = databaseReference.push().getKey();
-                    CalendarConstructor newProject = new CalendarConstructor(projectId, projectName, subject, description, dueDate);
+                    AgendaConstructor newProject = new AgendaConstructor(projectId, projectName, subject, description, dueDate);
                     databaseReference.child(projectId).setValue(newProject);
                     projectList.add(0, newProject); // Añadir nuevo proyecto al inicio de la lista
-                    projectAdapter.notifyDataSetChanged();
+                    agendaAdapter.notifyDataSetChanged();
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(CalendarActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AgendaActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    private void showEditProjectDialog(int position) {
+    private void editartarea(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_addwork, null);
@@ -205,7 +203,7 @@ public class CalendarActivity extends AppCompatActivity {
         final EditText editTextDescription = dialogView.findViewById(R.id.editTextDescription);
         final EditText editTextDueDate = dialogView.findViewById(R.id.editTextDueDate);
 
-        final CalendarConstructor project = projectList.get(position);
+        final AgendaConstructor project = projectList.get(position);
 
         editTextProjectName.setText(project.getNombre());
         editTextSubject.setText(project.getAsignatura());
@@ -215,7 +213,7 @@ public class CalendarActivity extends AppCompatActivity {
         editTextDueDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDatePickerDialog(editTextDueDate);
+                dialogfecha(editTextDueDate);
             }
         });
 
@@ -240,17 +238,17 @@ public class CalendarActivity extends AppCompatActivity {
                     project.setAsignatura(subject);
                     project.setDescripcion(description);
                     project.setFecha(dueDate);
-                    updateProjectInFirebase(project);
-                    projectAdapter.notifyDataSetChanged();
+                    guardatareaFirebase(project);
+                    agendaAdapter.notifyDataSetChanged();
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(CalendarActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AgendaActivity.this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    private void showDatePickerDialog(final EditText editTextDueDate) {
+    private void dialogfecha(final EditText editTextDueDate) {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -267,21 +265,21 @@ public class CalendarActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    private void updateProjectInFirebase(CalendarConstructor project) {
+    private void guardatareaFirebase(AgendaConstructor project) {
         databaseReference.child(project.getId()).setValue(project)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(CalendarActivity.this, "Proyecto actualizado", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AgendaActivity.this, "Proyecto actualizado", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(CalendarActivity.this, "Error al actualizar el proyecto", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AgendaActivity.this, "Error al actualizar el proyecto", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
 
-    public void showAlert(String title, String message) {
+    public void muestraalerta(String title, String message) {
         if (!isFinishing() && !isDestroyed()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setTitle(title);

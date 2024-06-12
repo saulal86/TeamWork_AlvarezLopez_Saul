@@ -8,10 +8,10 @@ import com.example.teamwork_alvarezlopez_saul.InicioSesion.LogIn
 
 class Splash : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val screenSplash = installSplashScreen()
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        screenSplash.setKeepOnScreenCondition { true }
+        splash.setKeepOnScreenCondition { true }
         val intent = Intent(this, LogIn::class.java)
         startActivity(intent)
         finish()

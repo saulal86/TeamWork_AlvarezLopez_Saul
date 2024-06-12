@@ -25,7 +25,7 @@
             android:name=".Chat.activities.UsersActivity"
             android:exported="false" />
         <activity
-            android:name=".Calendario.CalendarActivity"
+            android:name=".Agenda.AgendaActivity"
             android:exported="false" />
         <activity
             android:name=".InicioSesion.SignUp"

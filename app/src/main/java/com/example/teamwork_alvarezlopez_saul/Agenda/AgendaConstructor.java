@@ -1,16 +1,16 @@
-package com.example.teamwork_alvarezlopez_saul.Calendario;
+package com.example.teamwork_alvarezlopez_saul.Agenda;
 
-public class CalendarConstructor {
+public class AgendaConstructor {
     private String id;
     private String nombre;
     private String asignatura;
     private String descripcion;
     private String fecha;
 
-    public CalendarConstructor() {
+    public AgendaConstructor() {
     }
 
-    public CalendarConstructor(String id, String nombre, String asignatura, String descripcion, String fecha) {
+    public AgendaConstructor(String id, String nombre, String asignatura, String descripcion, String fecha) {
         this.id = id;
         this.nombre = nombre;
         this.asignatura = asignatura;

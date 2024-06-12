@@ -25,7 +25,7 @@ public class UsersActivity extends BaseActivity implements UserListener {
 
     private ActivityUsersBinding binding;
 
-    private FloatingActionButton back, info;
+    private FloatingActionButton atras, info;
     private PreferenceManager preferenceManager;
 
 
@@ -38,29 +38,29 @@ public class UsersActivity extends BaseActivity implements UserListener {
         binding.usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.usersRecyclerView.setHasFixedSize(true);
 
-        back = binding.back;
+        atras = binding.back;
 
-        back.setOnClickListener(v -> {
+        atras.setOnClickListener(v -> {
             finish();
         });
 
         info = binding.info;
 
         info.setOnClickListener(v -> {
-            showAlert("Info", "Toque sobre un usuario para iniciar una conversación con este.");
+            muestraalerta("Info", "Toque sobre un usuario para iniciar una conversación con este.");
         });
 
         preferenceManager = new PreferenceManager(getApplicationContext());
-        getUsers();
+        cogeusuarios();
     }
 
-    private void getUsers() {
-        loading(true);
+    private void cogeusuarios() {
+        cargando(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constantes.KEY_COLLECTION_USERS)
                 .get()
                 .addOnCompleteListener(task -> {
-                    loading(false);
+                    cargando(false);
                     String currentUserId = preferenceManager.getString(Constantes.KEY_USERS_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
                         List<User> users = new ArrayList<>();
@@ -79,21 +79,21 @@ public class UsersActivity extends BaseActivity implements UserListener {
                             binding.usersRecyclerView.setAdapter(usersAdapter);
                             binding.usersRecyclerView.setVisibility(View.VISIBLE);
                         } else {
-                            showErrorMessage();
+                            muestraerror();
                         }
                     } else {
-                        showErrorMessage();
+                        muestraerror();
                     }
                 });
     }
 
 
-    private void showErrorMessage() {
+    private void muestraerror() {
         binding.textErrorMessage.setText(String.format("%s", "No user available"));
         binding.textErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    private void loading(Boolean isLoading) {
+    private void cargando(Boolean isLoading) {
         if (isLoading) {
             binding.progressBar.setVisibility(View.VISIBLE);
         } else {
@@ -109,7 +109,7 @@ public class UsersActivity extends BaseActivity implements UserListener {
         finish();
     }
 
-    public void showAlert(String title, String message) {
+    public void muestraalerta(String title, String message) {
         if (!isFinishing() && !isDestroyed()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setTitle(title);

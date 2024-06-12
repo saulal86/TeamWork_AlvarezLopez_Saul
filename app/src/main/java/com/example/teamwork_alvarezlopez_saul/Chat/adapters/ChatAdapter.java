@@ -42,9 +42,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_SENT) {
-            ((SentMessageViewHolder) holder).setData(chatMessages.get(position));
+            ((SentMessageViewHolder) holder).datos(chatMessages.get(position));
         } else {
-            ((ReceivedMessageViewHolder) holder).setData(chatMessages.get(position));
+            ((ReceivedMessageViewHolder) holder).datos(chatMessages.get(position));
         }
     }
 
@@ -55,7 +55,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public int getItemViewType(int position) {
-        if (chatMessages.get(position).senderId.equals(senderId)) {
+        if (chatMessages.get(position).idenvia.equals(senderId)) {
             return VIEW_TYPE_SENT;
         } else {
             return VIEW_TYPE_RECEIVED;
@@ -70,9 +70,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerSendMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            binding.textMessage.setText(chatMessage.message);
-            binding.textDateTime.setText(chatMessage.dateTime);
+        void datos(ChatMessage chatMessage) {
+            binding.textMessage.setText(chatMessage.mensaje);
+            binding.textDateTime.setText(chatMessage.tiempo);
         }
     }
 
@@ -84,9 +84,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerReceivedMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            binding.textMessage.setText(chatMessage.message);
-            binding.textDateTime.setText(chatMessage.dateTime);
+        void datos(ChatMessage chatMessage) {
+            binding.textMessage.setText(chatMessage.mensaje);
+            binding.textDateTime.setText(chatMessage.tiempo);
         }
     }
 }
