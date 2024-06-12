@@ -9,8 +9,10 @@ import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes;
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager;
 import com.example.teamwork_alvarezlopez_saul.Chat.models.User;
 import com.example.teamwork_alvarezlopez_saul.Chat.adapters.ChatAdapter;
+import com.example.teamwork_alvarezlopez_saul.R;
 import com.example.teamwork_alvarezlopez_saul.databinding.ActivityChatBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,6 +39,8 @@ public class ChatActivity extends BaseActivity {
     private String conversionId = null;
     private boolean isReceiverAvailable = false;
 
+    private FloatingActionButton imageBack;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +50,14 @@ public class ChatActivity extends BaseActivity {
         init();
         setListeners();
         listenMessages();
+        imageBack = findViewById(R.id.imageBack);
+        imageBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        }
+        );
     }
 
     private void init() {

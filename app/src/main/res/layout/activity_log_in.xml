@@ -46,7 +46,7 @@
 
     <EditText
         android:id="@+id/contraseñaEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -56,11 +56,22 @@
         android:inputType="textPassword"
         android:textColorHint="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/eyeButton"
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.456" />
+
+    <ImageButton
+        android:id="@+id/eyeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_eye"
+        app:layout_constraintBottom_toBottomOf="@id/contraseñaEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/contraseñaEditText" />
 
     <Button
         android:id="@+id/logInButton"

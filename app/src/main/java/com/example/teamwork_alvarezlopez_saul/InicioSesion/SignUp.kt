@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -17,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.Constantes
 import com.example.teamwork_alvarezlopez_saul.Chat.utilities.PreferenceManager
 import com.example.teamwork_alvarezlopez_saul.Home.Home
-import com.example.teamwork_alvarezlopez_saul.Notas.Notes
 import com.example.teamwork_alvarezlopez_saul.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -27,7 +28,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 
-enum class ProviderType{
+enum class ProviderType {
     BASIC,
     GOOGLE
 }
@@ -40,6 +41,10 @@ class SignUp : AppCompatActivity() {
     private lateinit var googleButton: ImageButton
     private lateinit var SignUpLayout: ConstraintLayout
     private lateinit var textoiniciarsesion: TextView
+    private lateinit var togglePasswordVisibilityButton: ImageButton
+    private lateinit var toggleConfirmPasswordVisibilityButton: ImageButton
+    private var isPasswordVisible = false
+    private var isConfirmPasswordVisible = false
     private val GOOGLE_SIGN_IN = 100
 
     private lateinit var preferenceManager: PreferenceManager
@@ -56,7 +61,33 @@ class SignUp : AppCompatActivity() {
         confirmarcontraseñaEditText = findViewById(R.id.confirmarcontraseñaEditText)
         textoiniciarsesion = findViewById(R.id.textoiniciarsesion)
         googleButton = findViewById(R.id.googlebutton)
+        togglePasswordVisibilityButton = findViewById(R.id.togglePasswordVisibilityButton)
+        toggleConfirmPasswordVisibilityButton = findViewById(R.id.toggleConfirmPasswordVisibilityButton)
         preferenceManager = PreferenceManager(applicationContext)
+
+        togglePasswordVisibilityButton.setOnClickListener {
+            if (isPasswordVisible) {
+                contraseñaEditText.transformationMethod = PasswordTransformationMethod.getInstance()
+                togglePasswordVisibilityButton.setImageResource(R.drawable.ic_eye)
+            } else {
+                contraseñaEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                togglePasswordVisibilityButton.setImageResource(R.drawable.ic_eye_off)
+            }
+            isPasswordVisible = !isPasswordVisible
+            contraseñaEditText.setSelection(contraseñaEditText.text.length) // Para mover el cursor al final del texto
+        }
+
+        toggleConfirmPasswordVisibilityButton.setOnClickListener {
+            if (isConfirmPasswordVisible) {
+                confirmarcontraseñaEditText.transformationMethod = PasswordTransformationMethod.getInstance()
+                toggleConfirmPasswordVisibilityButton.setImageResource(R.drawable.ic_eye)
+            } else {
+                confirmarcontraseñaEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                toggleConfirmPasswordVisibilityButton.setImageResource(R.drawable.ic_eye_off)
+            }
+            isConfirmPasswordVisible = !isConfirmPasswordVisible
+            confirmarcontraseñaEditText.setSelection(confirmarcontraseñaEditText.text.length) // Para mover el cursor al final del texto
+        }
 
         // Configuración
         setup()
@@ -90,6 +121,7 @@ class SignUp : AppCompatActivity() {
                                 val user = task.result?.user
                                 val userId = user?.uid ?: ""
                                 preferenceManager.putString(Constantes.KEY_USERS_ID, userId)
+                                preferenceManager.putString(Constantes.KEY_EMAIL, email)
                                 Log.d("SignUp", "User ID saved: $userId")
                                 saveUserToFirestore(userId, email) // Guarda el userId y el email en Firestore
                                 showHomeOrVerifyEmail(email, userId, ProviderType.BASIC)
@@ -195,10 +227,12 @@ class SignUp : AppCompatActivity() {
 
         documentReference.set(data)
             .addOnSuccessListener {
+                Log.d("Firestore", "User data successfully written!")
                 Toast.makeText(applicationContext, "La información del usuario ha sido insertada", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { exception ->
-                Toast.makeText(applicationContext, exception.message, Toast.LENGTH_SHORT).show()
+                Log.e("Firestore", "Error writing document", exception)
+                Toast.makeText(applicationContext, "Error: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -254,7 +288,7 @@ class SignUp : AppCompatActivity() {
                         showAlert("Error", "User ID is null")
                     }
                 } else {
-                    showAlert("mal", "Error al obtener el token")
+                    showAlert("Error", "Error al obtener el token")
                 }
             }
     }
@@ -265,7 +299,7 @@ class SignUp : AppCompatActivity() {
 
         if (userId.isEmpty() || token.isEmpty()) {
             Log.e("SignUp", "Invalid userId or token")
-            showAlert("mal", "User ID or token is invalid")
+            showAlert("Error", "User ID or token is invalid")
             return
         }
 
@@ -276,7 +310,7 @@ class SignUp : AppCompatActivity() {
         documentReference.update(data)
             .addOnFailureListener { exception ->
                 Log.e("SignUp", "Error updating token: ${exception.message}")
-                showAlert("mal", "no se ha introducido el token: ${exception.message}")
+                showAlert("Error", "no se ha introducido el token: ${exception.message}")
             }
     }
 }

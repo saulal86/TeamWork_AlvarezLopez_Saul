@@ -57,21 +57,43 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.393" />
 
+    <ImageButton
+        android:id="@+id/togglePasswordVisibilityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_eye"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintEnd_toEndOf="@id/contraseñaEditText"
+        app:layout_constraintBottom_toBottomOf="@id/contraseñaEditText"
+        app:layout_constraintTop_toTopOf="@id/contraseñaEditText"
+        android:layout_marginEnd="8dp" />
+
+
     <EditText
         android:id="@+id/confirmarcontraseñaEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_margin="20dp"
         android:hint="Repite la contraseña"
         android:inputType="textPassword"
         android:textColorHint="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.457" />
+
+    <ImageButton
+        android:id="@+id/toggleConfirmPasswordVisibilityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_eye"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintEnd_toEndOf="@id/confirmarcontraseñaEditText"
+        app:layout_constraintBottom_toBottomOf="@id/confirmarcontraseñaEditText"
+        app:layout_constraintTop_toTopOf="@id/confirmarcontraseñaEditText"
+        android:layout_marginEnd="8dp" />
 
     <Button
         android:id="@+id/signUpbutton"
